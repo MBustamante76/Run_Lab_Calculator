@@ -1,0 +1,35 @@
+body {
+  margin: 0;
+  background: #f4f4f2;
+  color: #121212;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.engine-diagnostics {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+}
+
+.engine-diagnostics h1 {
+  margin: 0 0 8px;
+  font-size: 32px;
+  letter-spacing: -0.04em;
+}
+
+.engine-diagnostics p {
+  margin: 0 0 20px;
+  color: #555555;
+}
+
+.engine-diagnostics pre {
+  margin: 0;
+  padding: 20px;
+  overflow-x: auto;
+  background: #151515;
+  color: #f4f4f2;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
