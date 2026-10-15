@@ -1,4 +1,5 @@
 import { splitDistancesFor } from "./events";
+import { formatPace, formatSpeed, formatSplit } from "./formatting";
 import type { RaceMetrics, ValidationResult } from "./types";
 import {
   pacePerKilometreMilliseconds,
@@ -49,4 +50,20 @@ export function calculateRaceMetrics(
       milliseconds: (totalTimeMilliseconds * metres) / distanceMetres,
     })),
   });
+}
+
+export const averageValuesNote = "These are average values over the full distance.";
+
+export function presentRaceMetrics(metrics: RaceMetrics) {
+  return {
+    pacePerKilometre: formatPace(metrics.pacePerKilometreMilliseconds),
+    pacePerMile: formatPace(metrics.pacePerMileMilliseconds),
+    speedKilometresPerHour: formatSpeed(metrics.speedKilometresPerHour),
+    speedMilesPerHour: formatSpeed(metrics.speedMilesPerHour),
+    rhythms: metrics.rhythms.map((rhythm) => ({
+      metres: rhythm.metres,
+      time: formatSplit(rhythm.milliseconds),
+    })),
+    note: averageValuesNote,
+  };
 }
