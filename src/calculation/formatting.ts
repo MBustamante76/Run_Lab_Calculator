@@ -59,6 +59,11 @@ export function formatPace(milliseconds: number): string {
 
 /** Track rhythm. Under a minute this stays in seconds with one tenth; 60.0 seconds carries to 1:00.0. */
 export function formatSplit(milliseconds: number): string {
+  return formatPerformanceTime(milliseconds);
+}
+
+/** A PB or predicted time: 25.0 under a minute, otherwise 2:10.0 or 1:02:03.0. */
+export function formatPerformanceTime(milliseconds: number): string {
   const parts = durationParts(milliseconds, 1);
   if (parts.hours === 0 && parts.minutes === 0) {
     return `${parts.seconds}.${parts.fraction}`;

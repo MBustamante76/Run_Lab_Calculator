@@ -1,5 +1,6 @@
 /reference-input
-/docs
+/docs/*
+!/docs/tool-01-methodology-review.md
 node_modules/
 coverage/
 releases/
