@@ -34,7 +34,8 @@ describe("calculator shell", () => {
 
     expect(predict).toHaveAttribute("aria-checked", "true");
     expect(screen.getByRole("heading", { level: 3, name: "Predict my times at other distances" })).toBeInTheDocument();
-    expect(screen.getByText("Results are not calculated in this version.")).toBeInTheDocument();
+    expect(screen.getByLabelText("PB distance")).toBeInTheDocument();
+    expect(screen.queryByText("Results are not calculated in this version.")).not.toBeInTheDocument();
     expect(screen.queryByText(/NaN|10:59|estimated equivalent/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /book a consultation/i })).not.toBeInTheDocument();
