@@ -1,0 +1,21 @@
+.run-lab-calculator {
+  --color-bg: #f4f4f2;
+  --color-text: #121212;
+  --color-text-muted: #737373;
+  --color-text-body: #555555;
+  --color-line: #d6d6d2;
+  --color-soft: #e9e9e6;
+  --color-accent: #ffb400;
+  --color-accent-text: #9a6d00;
+  --color-workspace: #151515;
+  --color-workspace-line: #343434;
+  --color-choice: #202020;
+  --color-choice-selected: #29251a;
+  --color-panel: #f8f8f5;
+  --color-white: #ffffff;
+  --color-focus: rgba(255, 180, 0, 0.35);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --space-page: 28px;
+  --radius-workspace: 26px;
+  --radius-choice: 15px;
+}
