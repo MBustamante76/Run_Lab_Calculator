@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { eventById, events } from "../calculation/events";
 import { calculateRaceMetrics } from "../calculation/raceMetrics";
-import { parseStructuredTime } from "../calculation/time";
+import { parseStructuredTime, readStructuredNumber } from "../calculation/time";
 import type { RaceMetrics, ValidationError } from "../calculation/types";
 import { ErrorSummary } from "../app/ErrorSummary";
 import { ResultPanel } from "../app/ResultPanel";
@@ -22,17 +22,6 @@ const emptyForm: PaceForm = {
   seconds: "",
 };
 
-function fieldNumber(value: string): unknown {
-  const trimmed = value.trim();
-  if (trimmed === "") {
-    return "";
-  }
-  if (!/^\d+(\.\d+)?$/.test(trimmed)) {
-    return trimmed;
-  }
-  return Number(trimmed);
-}
-
 function messageFor(errors: readonly ValidationError[], fieldId: string): string | undefined {
   return errors.find((error) => error.fieldId === fieldId)?.message;
 }
@@ -44,8 +33,8 @@ export function Tool02RacePace() {
 
   function calculate() {
     const parsed = parseStructuredTime({
-      minutes: fieldNumber(form.minutes),
-      seconds: fieldNumber(form.seconds),
+      minutes: readStructuredNumber(form.minutes),
+      seconds: readStructuredNumber(form.seconds),
     });
 
     if (!parsed.ok) {
@@ -89,6 +78,7 @@ export function Tool02RacePace() {
         onChange={(eventId) => setForm((current) => ({ ...current, eventId }))}
       />
       <StructuredTimeInput
+        idPrefix="pace"
         minutes={form.minutes}
         seconds={form.seconds}
         minutesError={messageFor(errors, "minutes")}

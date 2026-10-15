@@ -24,7 +24,7 @@ const catalogue = [
     title: "Calculate my finishing time",
     description: "Enter a distance and running pace to find your finish time.",
     purpose:
-      "This tool turns a race distance and running pace into a finishing time.",
+      "This tool turns a race distance and running pace into a finishing time. This assumes the entered average pace is maintained for the full distance.",
   },
   {
     id: "target",

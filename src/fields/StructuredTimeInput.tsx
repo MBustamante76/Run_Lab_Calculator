@@ -31,6 +31,7 @@ function TimeField({ id, label, value, onChange, error, inputMode }: TimeFieldPr
 }
 
 type StructuredTimeInputProps = {
+  idPrefix: string;
   minutes: string;
   seconds: string;
   onMinutesChange: (value: string) => void;
@@ -40,6 +41,7 @@ type StructuredTimeInputProps = {
 };
 
 export function StructuredTimeInput({
+  idPrefix,
   minutes,
   seconds,
   onMinutesChange,
@@ -50,7 +52,7 @@ export function StructuredTimeInput({
   return (
     <div className="run-lab-calculator__row">
       <TimeField
-        id="pace-minutes"
+        id={`${idPrefix}-minutes`}
         label="Minutes"
         value={minutes}
         inputMode="numeric"
@@ -58,7 +60,7 @@ export function StructuredTimeInput({
         onChange={onMinutesChange}
       />
       <TimeField
-        id="pace-seconds"
+        id={`${idPrefix}-seconds`}
         label="Seconds"
         value={seconds}
         inputMode="decimal"

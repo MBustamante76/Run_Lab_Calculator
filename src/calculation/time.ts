@@ -84,6 +84,18 @@ function parseField(
   return { errors: [], value, provided: true };
 }
 
+/** Turns one typed field into a number for structured parsing. Display strings such as 4:10 are left unchanged so they are rejected. */
+export function readStructuredNumber(value: string): unknown {
+  const trimmed = value.trim();
+  if (trimmed === "") {
+    return "";
+  }
+  if (!/^-?\d+(\.\d+)?$/.test(trimmed)) {
+    return trimmed;
+  }
+  return Number(trimmed);
+}
+
 export function parseStructuredTime(input: StructuredTimeInput): ValidationResult<ParsedTime> {
   const hours = parseField(input.hours, "hours", "hours", false, true);
   const minutes = parseField(input.minutes, "minutes", "minutes", true, true);

@@ -41,6 +41,12 @@ export function formatRaceTime(milliseconds: number): string {
   return `${parts.minutes}:${seconds}`;
 }
 
+/** Finishing time. A zero tenth is omitted, so an exact 12:30 stays 12:30. */
+export function formatFinishTime(milliseconds: number): string {
+  const withTenths = formatRaceTime(milliseconds);
+  return withTenths.endsWith(".0") ? withTenths.slice(0, -2) : withTenths;
+}
+
 /** Road pace in whole seconds. */
 export function formatPace(milliseconds: number): string {
   const parts = durationParts(milliseconds, 0);

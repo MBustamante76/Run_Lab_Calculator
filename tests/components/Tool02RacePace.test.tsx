@@ -118,8 +118,8 @@ describe("Tool 02 race pace", () => {
 
     await user.click(choice(/03\s*calculate my finishing time/i));
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("Race distance")).not.toBeInTheDocument();
-    expect(screen.getByText("Results are not calculated in this version.")).toBeInTheDocument();
+    expect(screen.queryByText("4:00")).not.toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Per kilometre" })).toBeChecked();
 
     await openPace(user);
     await calculate(user, "20", "0");
