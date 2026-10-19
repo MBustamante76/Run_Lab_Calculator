@@ -35,6 +35,11 @@
   letter-spacing: 0.18em;
 }
 
+.run-lab-calculator h1,
+.run-lab-calculator h3 {
+  color: var(--color-text);
+}
+
 .run-lab-calculator h1 {
   margin: 8px 0 0;
   font-size: clamp(36px, 6vw, 82px);
@@ -93,8 +98,15 @@
 
 .run-lab-calculator h2 {
   margin: 5px 0 0;
+  color: var(--color-white);
   font-size: clamp(30px, 4vw, 48px);
   letter-spacing: -0.045em;
+}
+
+.run-lab-calculator button,
+.run-lab-calculator input,
+.run-lab-calculator select {
+  font-family: inherit;
 }
 
 .run-lab-calculator__work-grid {
