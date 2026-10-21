@@ -130,6 +130,31 @@ Notes:
 
 Users see the friendly method label, for example "Middle and long-distance scaling". The exact method ID and version, for example `power-law` and `1.06-1.0.0`, stay internal. They are carried on every result for diagnostics and tests, but are not shown in the Tool 01 interface.
 
+## Candidate middle-distance event-pair models
+
+RUN-LAB has confirmed that credible middle-distance event relationships matter to the product, particularly around 400m, 600m, 800m and 1500m.
+
+The following directions are **candidate routes only**. They are **not** enabled in the production V1 configuration:
+
+- 400m → 800m
+- 800m → 400m
+- 600m → 800m
+- 800m → 600m
+- 800m → 1500m
+- 1500m → 800m
+
+Rules for any future enablement:
+
+- each direction needs its own approved methodology;
+- coefficients must come from an agreed, reliable basis (for example approved empirical KsA relationships);
+- do not invent coefficients;
+- do not substitute the generic k=1.06 power-law formula for these routes;
+- do not treat a relationship as automatically reversible;
+- until methodology approval, the current unsupported result for these single-PB routes remains correct.
+
+No production event-pair coefficients are currently approved. `predictionConfig.eventPairs` remains empty.
+
 ## 9. Outstanding items
 
 1. Approved empirical KsA relationships still need to be supplied before any event-pair route can be configured. Until then, a single PB under 1500m returns unsupported.
+2. The six candidate middle-distance directions above still need methodology and coefficient approval before production activation.
