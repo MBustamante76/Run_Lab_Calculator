@@ -7,6 +7,10 @@ import { parseStructuredTime, readStructuredNumber } from "../calculation/time";
 import type { RaceMetrics, ValidationError } from "../calculation/types";
 import { ErrorSummary } from "../app/ErrorSummary";
 import { PredictionResultPanel } from "../app/PredictionResultPanel";
+import {
+  candidatePairingNotice,
+  isCandidateEventPair,
+} from "../config/candidateEventPairs";
 import { DistanceSelect } from "../fields/DistanceSelect";
 import { StructuredTimeInput } from "../fields/StructuredTimeInput";
 
@@ -65,6 +69,17 @@ function prefixTimeErrors(errors: readonly ValidationError[], prefix: "first" | 
   }));
 }
 
+function unsupportedMessageFor(
+  explanation: string,
+  performances: readonly { eventId: string }[],
+  targetEventId: string,
+): string {
+  if (performances.length === 1 && isCandidateEventPair(performances[0].eventId, targetEventId)) {
+    return `${explanation} ${candidatePairingNotice}`;
+  }
+  return explanation;
+}
+
 export function Tool01Predict() {
   const [form, setForm] = useState<PredictForm>(emptyForm);
   const [errors, setErrors] = useState<readonly ValidationError[]>([]);
@@ -116,7 +131,10 @@ export function Tool01Predict() {
 
     setErrors([]);
     if (result.status === "unsupported") {
-      setOutcome({ status: "unsupported", message: result.explanation });
+      setOutcome({
+        status: "unsupported",
+        message: unsupportedMessageFor(result.explanation, performances, form.targetEventId),
+      });
       return;
     }
 
@@ -149,66 +167,82 @@ export function Tool01Predict() {
         calculate();
       }}
     >
+      <p className="run-lab-calculator__form-lead">
+        Enter a PB, optionally add another PB, then choose the target distance.
+      </p>
       <ErrorSummary errors={errors} />
-      <DistanceSelect
-        id="predict-pb"
-        label="PB distance"
-        events={predictEvents}
-        value={form.firstEventId}
-        error={messageFor(errors, "firstEvent")}
-        onChange={(firstEventId) => update({ ...form, firstEventId })}
-      />
-      <fieldset className="run-lab-calculator__time">
-        <legend>PB time</legend>
-        <StructuredTimeInput
-          idPrefix="predict-first"
-          minutes={form.firstMinutes}
-          seconds={form.firstSeconds}
-          minutesError={messageFor(errors, "firstMinutes")}
-          secondsError={messageFor(errors, "firstSeconds") ?? messageFor(errors, "firstTime")}
-          onMinutesChange={(firstMinutes) => update({ ...form, firstMinutes })}
-          onSecondsChange={(firstSeconds) => update({ ...form, firstSeconds })}
-        />
-      </fieldset>
-      {form.secondEnabled ? (
-        <div className="run-lab-calculator__second">
+      <div className={form.secondEnabled ? "run-lab-calculator__pb-group" : undefined}>
+        <div className="run-lab-calculator__pb">
+          {form.secondEnabled ? <p className="run-lab-calculator__pb-label">PB 1</p> : null}
           <DistanceSelect
-            id="predict-second-pb"
-            label="Second PB distance"
-            events={secondEvents}
-            value={form.secondEventId}
-            error={messageFor(errors, "secondEvent")}
-            onChange={(secondEventId) => update({ ...form, secondEventId })}
+            id="predict-pb"
+            label="PB distance"
+            events={predictEvents}
+            value={form.firstEventId}
+            error={messageFor(errors, "firstEvent")}
+            onChange={(firstEventId) => update({ ...form, firstEventId })}
           />
           <fieldset className="run-lab-calculator__time">
-            <legend>Second PB time</legend>
+            <legend>PB time</legend>
             <StructuredTimeInput
-              idPrefix="predict-second"
-              minutes={form.secondMinutes}
-              seconds={form.secondSeconds}
-              minutesError={messageFor(errors, "secondMinutes")}
-              secondsError={messageFor(errors, "secondSeconds") ?? messageFor(errors, "secondTime")}
-              onMinutesChange={(secondMinutes) => update({ ...form, secondMinutes })}
-              onSecondsChange={(secondSeconds) => update({ ...form, secondSeconds })}
+              idPrefix="predict-first"
+              minutes={form.firstMinutes}
+              seconds={form.firstSeconds}
+              minutesError={messageFor(errors, "firstMinutes")}
+              secondsError={messageFor(errors, "firstSeconds") ?? messageFor(errors, "firstTime")}
+              onMinutesChange={(firstMinutes) => update({ ...form, firstMinutes })}
+              onSecondsChange={(firstSeconds) => update({ ...form, firstSeconds })}
             />
           </fieldset>
+        </div>
+        {form.secondEnabled ? (
+          <div className="run-lab-calculator__pb run-lab-calculator__pb--second">
+            <p className="run-lab-calculator__pb-label">PB 2 · optional</p>
+            <DistanceSelect
+              id="predict-second-pb"
+              label="Second PB distance"
+              events={secondEvents}
+              value={form.secondEventId}
+              error={messageFor(errors, "secondEvent")}
+              onChange={(secondEventId) => update({ ...form, secondEventId })}
+            />
+            <fieldset className="run-lab-calculator__time">
+              <legend>Second PB time</legend>
+              <StructuredTimeInput
+                idPrefix="predict-second"
+                minutes={form.secondMinutes}
+                seconds={form.secondSeconds}
+                minutesError={messageFor(errors, "secondMinutes")}
+                secondsError={messageFor(errors, "secondSeconds") ?? messageFor(errors, "secondTime")}
+                onMinutesChange={(secondMinutes) => update({ ...form, secondMinutes })}
+                onSecondsChange={(secondSeconds) => update({ ...form, secondSeconds })}
+              />
+            </fieldset>
+            <button
+              type="button"
+              className="run-lab-calculator__reset"
+              onClick={() =>
+                update({
+                  ...form,
+                  secondEnabled: false,
+                  secondMinutes: "",
+                  secondSeconds: "",
+                })
+              }
+            >
+              Remove second PB
+            </button>
+          </div>
+        ) : (
           <button
             type="button"
-            className="run-lab-calculator__reset"
-            onClick={() => update({ ...form, secondEnabled: false, secondMinutes: "", secondSeconds: "" })}
+            className="run-lab-calculator__reset run-lab-calculator__add"
+            onClick={() => update({ ...form, secondEnabled: true })}
           >
-            Remove second PB
+            + Add another PB
           </button>
-        </div>
-      ) : (
-        <button
-          type="button"
-          className="run-lab-calculator__reset run-lab-calculator__add"
-          onClick={() => update({ ...form, secondEnabled: true })}
-        >
-          Add a second PB
-        </button>
-      )}
+        )}
+      </div>
       <DistanceSelect
         id="predict-target"
         label="Target distance"

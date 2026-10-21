@@ -12,7 +12,7 @@ export const introCopy = {
 export const workspaceCopy = {
   step: "Step 01 · Choose a calculator",
   heading: "I want to…",
-  notCalculated: "Results are not calculated in this version.",
-  futureMilestone: "Future milestone",
+  notCalculated: "This calculator is coming in the next milestone.",
+  futureMilestone: "Coming in the next milestone",
   purposeLabel: "What is it for?",
 } as const;

@@ -11,7 +11,7 @@ export function ResultPanel({ metrics }: ResultPanelProps) {
 
   return (
     <div className="run-lab-calculator__result" aria-live="polite">
-      <Metric label="Pace per km" value={presented.pacePerKilometre} />
+      <Metric label="Pace per km" value={presented.pacePerKilometre} primary />
       <Metric label="Pace per mile" value={presented.pacePerMile} />
       <Metric label="Speed km/h" value={presented.speedKilometresPerHour} />
       <Metric label="Speed mph" value={presented.speedMilesPerHour} />

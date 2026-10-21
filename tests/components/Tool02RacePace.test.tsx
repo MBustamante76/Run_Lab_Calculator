@@ -32,7 +32,11 @@ describe("Tool 02 race pace", () => {
 
     const result = screen.getByText("Pace per km").parentElement;
     expect(result).toHaveTextContent("4:00");
+    expect(result).toHaveClass("run-lab-calculator__metric--primary");
     expect(screen.getByText("Pace per mile").parentElement).toHaveTextContent("6:26");
+    expect(screen.getByText("Pace per mile").parentElement).not.toHaveClass(
+      "run-lab-calculator__metric--primary",
+    );
     expect(screen.getByText("Speed km/h").parentElement).toHaveTextContent("15.00");
     expect(screen.getByText("Average 400 m").parentElement).toHaveTextContent("1:36.0");
     expect(screen.getByText("These are average values over the full distance.")).toBeInTheDocument();

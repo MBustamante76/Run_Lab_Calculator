@@ -28,14 +28,14 @@ describe("calculator shell", () => {
     ]) {
       const futureTool = choice(label);
       expect(futureTool).toHaveAttribute("aria-disabled", "true");
-      expect(futureTool).toHaveTextContent("Future milestone");
+      expect(futureTool).toHaveTextContent("Coming in the next milestone");
       await user.click(futureTool);
     }
 
     expect(predict).toHaveAttribute("aria-checked", "true");
     expect(screen.getByRole("heading", { level: 3, name: "Predict my times at other distances" })).toBeInTheDocument();
     expect(screen.getByLabelText("PB distance")).toBeInTheDocument();
-    expect(screen.queryByText("Results are not calculated in this version.")).not.toBeInTheDocument();
+    expect(screen.queryByText("This calculator is coming in the next milestone.")).not.toBeInTheDocument();
     expect(screen.queryByText(/NaN|10:59|estimated equivalent/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /book a consultation/i })).not.toBeInTheDocument();

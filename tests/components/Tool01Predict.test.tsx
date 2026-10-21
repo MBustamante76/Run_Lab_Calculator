@@ -28,7 +28,7 @@ async function enterTime(name: string, minutes: string, seconds: string) {
 async function enterAnchors() {
   await user().selectOptions(screen.getByLabelText("PB distance"), "200");
   await enterTime("PB time", "0", "25");
-  await user().click(screen.getByRole("button", { name: "Add a second PB" }));
+  await user().click(screen.getByRole("button", { name: "+ Add another PB" }));
   await user().selectOptions(screen.getByLabelText("Second PB distance"), "800");
   await enterTime("Second PB time", "2", "10");
 }
@@ -115,7 +115,7 @@ describe("Tool 01 prediction", () => {
   it("warns when the target is outside the two PBs and an approved route exists", async () => {
     render(<RunLabCalculatorApp />);
     await enterTime("PB time", "4", "30");
-    await user().click(screen.getByRole("button", { name: "Add a second PB" }));
+    await user().click(screen.getByRole("button", { name: "+ Add another PB" }));
     await user().selectOptions(screen.getByLabelText("Second PB distance"), "3000");
     await enterTime("Second PB time", "9", "30");
     await user().selectOptions(screen.getByLabelText("Target distance"), "5000");
@@ -128,7 +128,7 @@ describe("Tool 01 prediction", () => {
   it("removes a PB distance from the other PB and from the target", async () => {
     render(<RunLabCalculatorApp />);
     await user().selectOptions(screen.getByLabelText("PB distance"), "200");
-    await user().click(screen.getByRole("button", { name: "Add a second PB" }));
+    await user().click(screen.getByRole("button", { name: "+ Add another PB" }));
 
     expect(within(screen.getByLabelText("Second PB distance")).queryByRole("option", { name: "200m" })).toBeNull();
     expect(within(screen.getByLabelText("Target distance")).queryByRole("option", { name: "200m" })).toBeNull();
@@ -156,13 +156,42 @@ describe("Tool 01 prediction", () => {
   it("asks for the second PB time and keeps the first PB", async () => {
     render(<RunLabCalculatorApp />);
     await enterTime("PB time", "4", "30");
-    await user().click(screen.getByRole("button", { name: "Add a second PB" }));
+    await user().click(screen.getByRole("button", { name: "+ Add another PB" }));
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
 
     expect(screen.getByRole("alert")).toHaveTextContent("Enter the minutes.");
     expect(timeFields("PB time").minutes).toHaveValue("4");
     expect(timeFields("PB time").seconds).toHaveValue("30");
     expect(screen.queryByText("Estimated equivalent performance")).not.toBeInTheDocument();
+  });
+
+  it("keeps PB 1 when the second PB is removed", async () => {
+    render(<RunLabCalculatorApp />);
+    await enterTime("PB time", "4", "30");
+    await user().click(screen.getByRole("button", { name: "+ Add another PB" }));
+    await enterTime("Second PB time", "2", "0");
+    await user().click(screen.getByRole("button", { name: "Remove second PB" }));
+
+    expect(screen.queryByLabelText("Second PB distance")).not.toBeInTheDocument();
+    expect(timeFields("PB time").minutes).toHaveValue("4");
+    expect(timeFields("PB time").seconds).toHaveValue("30");
+    expect(screen.getByRole("button", { name: "+ Add another PB" })).toBeInTheDocument();
+  });
+
+  it("softens unsupported candidate middle-distance pairings without inventing a time", async () => {
+    render(<RunLabCalculatorApp />);
+    await user().selectOptions(screen.getByLabelText("PB distance"), "800");
+    await enterTime("PB time", "2", "0");
+    await user().selectOptions(screen.getByLabelText("Target distance"), "1500");
+    await user().click(screen.getByRole("button", { name: "Calculate my result" }));
+
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent(
+      "We need a more relevant PB to estimate this distance reliably. Add a second PB closer to the target distance, or choose a nearer event.",
+    );
+    expect(status).toHaveTextContent("This event pairing isn't supported yet.");
+    expect(screen.queryByText("Estimated equivalent performance")).not.toBeInTheDocument();
+    expect(screen.queryByText("--:--")).not.toBeInTheDocument();
   });
 
   it("resets the prediction and clears it when another tool is selected", async () => {

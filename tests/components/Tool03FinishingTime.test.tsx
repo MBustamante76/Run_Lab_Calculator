@@ -40,7 +40,13 @@ describe("Tool 03 finishing time", () => {
     const result = screen.getByText("Finishing time").parentElement?.parentElement;
     expect(result).toHaveAttribute("aria-live", "polite");
     expect(screen.getByText("Finishing time").parentElement).toHaveTextContent("12:30");
+    expect(screen.getByText("Finishing time").parentElement).toHaveClass(
+      "run-lab-calculator__metric--primary",
+    );
     expect(screen.getByText("Pace per km").parentElement).toHaveTextContent("4:10");
+    expect(screen.getByText("Pace per km").parentElement).not.toHaveClass(
+      "run-lab-calculator__metric--primary",
+    );
     expect(
       screen.getByText("This assumes the entered average pace is maintained for the full distance."),
     ).toBeInTheDocument();

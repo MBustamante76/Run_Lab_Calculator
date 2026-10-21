@@ -12,7 +12,7 @@ export function FinishingResultPanel({ metrics, unit }: FinishingResultPanelProp
 
   return (
     <div className="run-lab-calculator__result" aria-live="polite">
-      <Metric label="Finishing time" value={presented.finishingTime} />
+      <Metric label="Finishing time" value={presented.finishingTime} primary />
       <Metric label={presented.enteredPaceLabel} value={presented.enteredPace} />
       <Metric label={presented.convertedPaceLabel} value={presented.convertedPace} />
       <Metric label="Speed km/h" value={presented.speedKilometresPerHour} />

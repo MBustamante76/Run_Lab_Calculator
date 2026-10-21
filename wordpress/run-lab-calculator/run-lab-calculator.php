@@ -6,7 +6,7 @@
  * Author: RUN-LAB
  * Text Domain: run-lab-calculator
  * Requires at least: 6.0
- * Requires PHP: 8.0
+ * Requires PHP: 7.4
  *
  * @package RunLabCalculator
  */

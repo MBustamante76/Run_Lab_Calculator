@@ -11,6 +11,8 @@ export default tseslint.config(
       "releases/**",
       "wordpress/**/assets/**",
       "dist/**",
+      "local/**",
+      ".vitest/**",
     ],
   },
   {

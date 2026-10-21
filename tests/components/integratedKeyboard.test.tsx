@@ -17,7 +17,7 @@ describe("integrated calculator keyboard", () => {
 
     const future = screen.getByRole("radio", { name: /04\s*plan my target pb/i });
     expect(future).toHaveAttribute("aria-disabled", "true");
-    expect(future).toHaveTextContent("Future milestone");
+    expect(future).toHaveTextContent("Coming in the next milestone");
     future.focus();
     await user.keyboard("{Enter}");
     expect(pace).toHaveAttribute("aria-checked", "true");

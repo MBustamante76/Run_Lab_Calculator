@@ -5,3 +5,5 @@ node_modules/
 coverage/
 releases/
 wordpress/run-lab-calculator/assets/
+local/
+.vitest/
