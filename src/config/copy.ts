@@ -16,3 +16,8 @@ export const workspaceCopy = {
   futureMilestone: "Coming in the next milestone",
   purposeLabel: "What is it for?",
 } as const;
+
+/** Always-visible footer under the six-tool shell (UX-12). Not shown inside result cards. */
+export const calculatorDisclaimer =
+  "A note about your results. RUN-LAB calculators use mathematical formulas and performance models to calculate or estimate running times, paces, speeds and performance comparisons. Results are intended as a guide, not a guarantee of future performance. Actual results may vary depending on fitness, training, pacing, fatigue, terrain, weather and race-day conditions.";
+

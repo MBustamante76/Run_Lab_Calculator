@@ -54,7 +54,10 @@ export function calculateRaceMetrics(
 
 export const averageValuesNote = "These are average values over the full distance.";
 
-export function presentRaceMetrics(metrics: RaceMetrics) {
+export const sprintAveragePaceNote =
+  "Sprint paces shown here are averages over the full distance, not a sustained race pace.";
+
+export function presentRaceMetrics(metrics: RaceMetrics, options?: { sprintAverages?: boolean }) {
   return {
     pacePerKilometre: formatPace(metrics.pacePerKilometreMilliseconds),
     pacePerMile: formatPace(metrics.pacePerMileMilliseconds),
@@ -64,6 +67,7 @@ export function presentRaceMetrics(metrics: RaceMetrics) {
       metres: rhythm.metres,
       time: formatSplit(rhythm.milliseconds),
     })),
-    note: averageValuesNote,
+    note: options?.sprintAverages ? sprintAveragePaceNote : averageValuesNote,
   };
 }
+

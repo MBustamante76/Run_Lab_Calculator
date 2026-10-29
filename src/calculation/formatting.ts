@@ -41,8 +41,15 @@ export function formatRaceTime(milliseconds: number): string {
   return `${parts.minutes}:${seconds}`;
 }
 
-/** Finishing time. A zero tenth is omitted, so an exact 12:30 stays 12:30. */
+/**
+ * Finishing time. Under a minute: seconds with one tenth and a unit suffix (12.5s).
+ * A zero tenth is omitted for longer times, so an exact 12:30 stays 12:30.
+ */
 export function formatFinishTime(milliseconds: number): string {
+  const parts = durationParts(milliseconds, 1);
+  if (parts.hours === 0 && parts.minutes === 0) {
+    return `${parts.seconds}.${parts.fraction}s`;
+  }
   const withTenths = formatRaceTime(milliseconds);
   return withTenths.endsWith(".0") ? withTenths.slice(0, -2) : withTenths;
 }
@@ -57,10 +64,15 @@ export function formatPace(milliseconds: number): string {
   return `${parts.minutes}:${seconds}`;
 }
 
-/** Track rhythm. Under a minute this stays in seconds with one tenth; 60.0 seconds carries to 1:00.0. */
+/** Track rhythm. Under a minute: seconds with one tenth and a unit suffix (17.0s); 60.0s carries to 1:00.0. */
 export function formatSplit(milliseconds: number): string {
+  const parts = durationParts(milliseconds, 1);
+  if (parts.hours === 0 && parts.minutes === 0) {
+    return `${parts.seconds}.${parts.fraction}s`;
+  }
   return formatPerformanceTime(milliseconds);
 }
+
 
 /** A PB or predicted time: 25.0 under a minute, otherwise 2:10.0 or 1:02:03.0. */
 export function formatPerformanceTime(milliseconds: number): string {
@@ -69,6 +81,25 @@ export function formatPerformanceTime(milliseconds: number): string {
     return `${parts.seconds}.${parts.fraction}`;
   }
   return formatRaceTime(milliseconds);
+}
+
+/**
+ * Tool 01 prediction display: tenths for targets ≤800m, whole seconds from 1000m up.
+ * Stored milliseconds are unchanged; only the shown string is rounded.
+ */
+export function formatPredictedDisplayTime(milliseconds: number, targetMetres: number): string {
+  if (targetMetres <= 800) {
+    return formatPerformanceTime(milliseconds);
+  }
+  const parts = durationParts(milliseconds, 0);
+  const seconds = secondsText(parts);
+  if (parts.hours > 0) {
+    return `${parts.hours}:${String(parts.minutes).padStart(2, "0")}:${seconds}`;
+  }
+  if (parts.minutes === 0) {
+    return String(parts.seconds);
+  }
+  return `${parts.minutes}:${seconds}`;
 }
 
 export function formatSpeed(value: number): string {

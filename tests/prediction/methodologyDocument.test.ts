@@ -28,8 +28,8 @@ describe("methodology document", () => {
       "57.0",
       "1:32.3",
       "Unsupported",
-      "9:22.9",
-      "37:31.7",
+      "9:23",
+      "37:32",
       "Unsupported",
     ]);
 

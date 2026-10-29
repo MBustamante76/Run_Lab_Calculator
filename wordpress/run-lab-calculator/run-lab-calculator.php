@@ -2,7 +2,7 @@
 /**
  * Plugin Name: RUN-LAB Performance Calculator
  * Description: Mounts the RUN-LAB performance calculator with the shortcode [run_lab_calculator].
- * Version: 0.1.0
+ * Version: 0.1.2
  * Author: RUN-LAB
  * Text Domain: run-lab-calculator
  * Requires at least: 6.0
@@ -89,5 +89,5 @@ function run_lab_calculator_asset_version(string $path): string
 {
     $modified = filemtime($path);
 
-    return '0.1.0.' . ($modified === false ? '0' : (string) $modified);
+    return '0.1.2.' . ($modified === false ? '0' : (string) $modified);
 }

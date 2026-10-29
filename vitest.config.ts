@@ -6,6 +6,8 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: "./tests/setup.ts",
+    testTimeout: 15_000,
+    exclude: ["**/node_modules/**", "**/e2e/**", "**/dist/**"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],

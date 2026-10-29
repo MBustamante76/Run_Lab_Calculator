@@ -1,5 +1,6 @@
-import { events } from "../events";
-import { formatPerformanceTime } from "../formatting";
+import { eventById, events } from "../events";
+import { formatPredictedDisplayTime } from "../formatting";
+
 import type { ValidationError } from "../types";
 import { validationError } from "../validation";
 import { EventPairStrategy } from "./EventPairStrategy";
@@ -89,10 +90,12 @@ function toSuccess(
     allWarnings.push({ code: "draft-method", message: draftMethodWarning });
   }
 
+  const targetMetres = eventById(request.targetEventId).metres;
+
   return {
     status: "success",
     predictedTimeMilliseconds: prediction.predictedTimeMilliseconds,
-    displayTime: formatPerformanceTime(prediction.predictedTimeMilliseconds),
+    displayTime: formatPredictedDisplayTime(prediction.predictedTimeMilliseconds, targetMetres),
     methodId: prediction.methodId,
     methodVersion: prediction.methodVersion,
     methodLabel: prediction.methodLabel,

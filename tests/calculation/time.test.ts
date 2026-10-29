@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { formatRaceTime, formatSplit } from "../../src/calculation/formatting";
+import { formatPredictedDisplayTime, formatRaceTime, formatSplit } from "../../src/calculation/formatting";
 import { parseStructuredTime } from "../../src/calculation/time";
+import { stepStructuredTime } from "../../src/fields/timeStepping";
+
+
 
 describe("structured time", () => {
   it("parses 5:12 as 312 seconds", () => {
@@ -68,4 +71,23 @@ describe("structured time", () => {
     expect(formatRaceTime(59_960)).not.toContain(":60");
     expect(formatSplit(60_000)).not.toContain("60.0");
   });
+
+  it("shows prediction tenths at or under 800m and whole seconds from 1000m up", () => {
+    expect(formatPredictedDisplayTime(138_670, 800)).toBe("2:18.7");
+    expect(formatPredictedDisplayTime(562_900, 1000)).toBe("9:23");
+    expect(formatPredictedDisplayTime(562_900, 3000)).toBe("9:23");
+  });
+
+  it("steps minutes and seconds with carry", () => {
+    expect(stepStructuredTime({ minutes: "1", seconds: "59" }, 1, false)).toEqual({
+      minutes: "2",
+      seconds: "0",
+    });
+    expect(stepStructuredTime({ hours: "0", minutes: "59", seconds: "30" }, 60, true)).toEqual({
+      hours: "1",
+      minutes: "0",
+      seconds: "30",
+    });
+  });
 });
+

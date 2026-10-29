@@ -28,15 +28,12 @@ describe("event configuration", () => {
     expect(countLiteral("src/calculation", "export const events")).toBe(1);
   });
 
-  it("limits 100 m, 200 m and 10K to prediction", () => {
-    for (const id of ["100", "200", "10k"]) {
-      expect(eventById(id).supportedToolIds).toEqual(["predict"]);
-    }
-
-    for (const id of ["400", "600", "800", "1000", "1500", "mile", "2000", "3000", "5000"]) {
-      expect(eventById(id).supportedToolIds).toEqual(["predict", "pace", "finish"]);
+  it("opens all catalogue distances to predict, pace and finish", () => {
+    for (const event of events) {
+      expect(event.supportedToolIds).toEqual(["predict", "pace", "finish"]);
     }
   });
+
 
   it("stores meaningful split options on each event", () => {
     expect(eventById("800").splitMetres).toEqual([100, 200, 400]);

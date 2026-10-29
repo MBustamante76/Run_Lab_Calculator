@@ -41,9 +41,32 @@ describe("Tool 02 race pace", () => {
     expect(screen.getByText("Average 400 m").parentElement).toHaveTextContent("1:36.0");
     expect(screen.getByText("These are average values over the full distance.")).toBeInTheDocument();
     expect(screen.queryByText("Average 100 m")).not.toBeInTheDocument();
-    expect(screen.queryByRole("option", { name: "100m" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("option", { name: "10K" })).not.toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "100m" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "200m" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "10K" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Hours")).toBeInTheDocument();
   });
+
+  it("calculates 10K in 1:05:00 with hours input", async () => {
+    const user = userEvent.setup();
+    render(<RunLabCalculatorApp />);
+    await openPace(user);
+    await user.selectOptions(screen.getByLabelText("Race distance"), "10k");
+    await user.clear(screen.getByLabelText("Hours"));
+    await user.type(screen.getByLabelText("Hours"), "1");
+    await user.clear(screen.getByLabelText("Minutes"));
+    await user.type(screen.getByLabelText("Minutes"), "5");
+    await user.clear(screen.getByLabelText("Seconds"));
+    await user.type(screen.getByLabelText("Seconds"), "0");
+    await user.click(screen.getByRole("button", { name: "Calculate my result" }));
+
+    expect(screen.getByText("Pace per km").parentElement).toHaveTextContent("6:30");
+    expect(screen.getByText("Pace per mile").parentElement).toHaveTextContent("10:28");
+    expect(screen.getByText("Speed km/h").parentElement).toHaveTextContent("9.23");
+    expect(screen.getByText("Speed mph").parentElement).toHaveTextContent("5.74");
+    expect(screen.getByText("Average 400 m").parentElement).toHaveTextContent("2:36.0");
+  });
+
 
   it("uses the mile event length of 1609.344 m", async () => {
     expect(eventById("mile").metres).toBe(1609.344);
@@ -107,11 +130,25 @@ describe("Tool 02 race pace", () => {
     await calculate(user, "20", "0");
     await user.click(screen.getByRole("button", { name: "Reset" }));
 
-    expect(screen.getByLabelText("Minutes")).toHaveValue("");
-    expect(screen.getByLabelText("Seconds")).toHaveValue("");
+    expect(screen.getByLabelText("Race distance")).toHaveValue("5000");
+    expect(screen.getByLabelText("Minutes")).toHaveValue("22");
+    expect(screen.getByLabelText("Seconds")).toHaveValue("0");
     expect(screen.queryByText("4:00")).not.toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
+
+  it("pre-fills and updates healthy average race times by distance", async () => {
+    const user = userEvent.setup();
+    render(<RunLabCalculatorApp />);
+    await openPace(user);
+    expect(screen.getByLabelText("Minutes")).toHaveValue("22");
+    expect(screen.getByLabelText("Seconds")).toHaveValue("0");
+
+    await user.selectOptions(screen.getByLabelText("Race distance"), "800");
+    expect(screen.getByLabelText("Minutes")).toHaveValue("2");
+    expect(screen.getByLabelText("Seconds")).toHaveValue("40");
+  });
+
 
   it("clears pace results and errors when another tool is selected", async () => {
     const user = userEvent.setup();
@@ -145,14 +182,42 @@ describe("Tool 02 race pace", () => {
     }
     expect(within(result).getByText("Average 100 m")).toBeInTheDocument();
     expect(within(result).getByText("Average 200 m")).toBeInTheDocument();
-    expect(within(result).getByText("15.0")).toBeInTheDocument();
-    expect(within(result).getByText("30.0")).toBeInTheDocument();
+    expect(within(result).getByText("15.0s")).toBeInTheDocument();
+    expect(within(result).getByText("30.0s")).toBeInTheDocument();
     expect(within(result).getByText("1:00.0")).toBeInTheDocument();
+
 
     await user.selectOptions(screen.getByLabelText("Race distance"), "5000");
     await user.click(screen.getByRole("button", { name: "Calculate my result" }));
     expect(screen.queryByText("Average 100 m")).not.toBeInTheDocument();
     expect(screen.getByText("Average 400 m")).toBeInTheDocument();
+  });
+
+  it("accepts times over 60 minutes via the hours field", async () => {
+    const user = userEvent.setup();
+    render(<RunLabCalculatorApp />);
+    await openPace(user);
+    await user.clear(screen.getByLabelText("Hours"));
+    await user.type(screen.getByLabelText("Hours"), "1");
+    await user.clear(screen.getByLabelText("Minutes"));
+    await user.type(screen.getByLabelText("Minutes"), "10");
+    await user.clear(screen.getByLabelText("Seconds"));
+    await user.type(screen.getByLabelText("Seconds"), "0");
+    await user.click(screen.getByRole("button", { name: "Calculate my result" }));
+
+    expect(screen.getByText("Pace per km").parentElement).toHaveTextContent("14:00");
+  });
+
+
+  it("flags sprint pace results as averages", async () => {
+    const user = userEvent.setup();
+    render(<RunLabCalculatorApp />);
+    await openPace(user);
+    await user.selectOptions(screen.getByLabelText("Race distance"), "100");
+    await calculate(user, "0", "12.5");
+    expect(
+      screen.getByText(/Sprint paces shown here are averages over the full distance/),
+    ).toBeInTheDocument();
   });
 
   it("does not put pace formulae in the React component", () => {
@@ -162,3 +227,4 @@ describe("Tool 02 race pace", () => {
     expect(source).toContain("calculateRaceMetrics");
   });
 });
+

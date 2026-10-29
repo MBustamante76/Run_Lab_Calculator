@@ -8,15 +8,16 @@ const catalogue = [
     title: "Predict my times at other distances",
     description: "Use a current PB to estimate equivalent race performances.",
     purpose:
-      "This tool estimates an equivalent performance at another distance from one or two of your own performances.",
+      "Imagine Sarah has a 1500m PB of 5:30. What might she run for 3000m?\n\nShe can enter one PB for a prediction, or add a second PB, such as her 5000m time, to make the estimate more personal.\n\nThink of it like joining two dots on a graph rather than guessing from one.\n\nIt's a useful guide, not a guarantee.",
   },
+
   {
     id: "pace",
     number: "02",
     title: "Calculate my race pace",
     description: "Turn a distance and finishing time into pace and speed.",
     purpose:
-      "This tool turns a race distance and finishing time into pace and speed.",
+      "James has just run 1500m in 5:30. But how fast was he actually running?\n\nEnter a distance and finishing time to discover your average pace, speed and split times.\n\nIt's like breaking a race into smaller, easier-to-understand pieces.\n\nRemember, these are averages. Your pace may have varied throughout the race.",
   },
   {
     id: "finish",
@@ -24,8 +25,9 @@ const catalogue = [
     title: "Calculate my finishing time",
     description: "Enter a distance and running pace to find your finish time.",
     purpose:
-      "This tool turns a race distance and running pace into a finishing time. This assumes the entered average pace is maintained for the full distance.",
+      "Sophie wants to run 3000m at 4 minutes per kilometre. What finishing time would that give her?\n\nEnter your distance and target pace to find out. For Sophie, that's 12 minutes.\n\nIt's like planning a journey. Know the distance and speed, and you can calculate the time.\n\nThe result assumes a steady average pace. It's a calculation, not a prediction of your fitness.",
   },
+
   {
     id: "target",
     number: "04",

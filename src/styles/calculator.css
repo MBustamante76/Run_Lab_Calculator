@@ -115,6 +115,15 @@
   min-height: 570px;
 }
 
+.run-lab-calculator__disclaimer {
+  margin: 0;
+  padding: 18px 28px 24px;
+  color: #a7a7a7;
+  font-size: 12px;
+  line-height: 1.55;
+  border-top: 1px solid var(--color-workspace-line);
+}
+
 .run-lab-calculator__choices {
   padding: 26px 28px 32px;
   border-right: 1px solid var(--color-workspace-line);
@@ -165,10 +174,15 @@
   display: grid;
   gap: 4px;
   min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .run-lab-calculator__choice-copy strong {
   font-size: 16px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 .run-lab-calculator__choice-copy small {
@@ -221,6 +235,7 @@
 .run-lab-calculator__purpose-text {
   margin-bottom: 0;
   font-size: 13px;
+  white-space: pre-line;
 }
 
 .run-lab-calculator__pending {
@@ -407,16 +422,117 @@
   cursor: pointer;
 }
 
-.run-lab-calculator__go {
-  color: #111111;
-  background: var(--color-accent);
-  border: 0;
+/* Beat host-theme `button` / `button:hover` colour rules (incl. !important). */
+.run-lab-calculator .run-lab-calculator__go,
+.run-lab-calculator .run-lab-calculator__go:is(:hover, :focus, :focus-visible, :active),
+.run-lab-calculator button.run-lab-calculator__go,
+.run-lab-calculator button.run-lab-calculator__go:is(:hover, :focus, :focus-visible, :active) {
+  color: #111111 !important;
+  background: #ffb400 !important;
+  background-color: #ffb400 !important;
+  border: 0 !important;
+  filter: none !important;
 }
 
-.run-lab-calculator__reset {
+.run-lab-calculator .run-lab-calculator__go:is(:hover, :focus, :focus-visible, :active),
+.run-lab-calculator button.run-lab-calculator__go:is(:hover, :focus, :focus-visible, :active) {
+  background: #f0a800 !important;
+  background-color: #f0a800 !important;
+}
+
+.run-lab-calculator .run-lab-calculator__go:disabled,
+.run-lab-calculator .run-lab-calculator__go:disabled:hover,
+.run-lab-calculator button.run-lab-calculator__go:disabled,
+.run-lab-calculator button.run-lab-calculator__go:disabled:hover {
+  cursor: not-allowed;
+  opacity: 0.55;
+  filter: none !important;
+  background: #ffb400 !important;
+  background-color: #ffb400 !important;
+}
+
+.run-lab-calculator .run-lab-calculator__reset,
+.run-lab-calculator .run-lab-calculator__reset:is(:hover, :focus, :focus-visible, :active),
+.run-lab-calculator button.run-lab-calculator__reset,
+.run-lab-calculator button.run-lab-calculator__reset:is(:hover, :focus, :focus-visible, :active) {
+  color: #121212 !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 1px solid #c9c9c4 !important;
+  filter: none !important;
+}
+
+.run-lab-calculator .run-lab-calculator__reset:is(:hover, :focus, :focus-visible, :active),
+.run-lab-calculator button.run-lab-calculator__reset:is(:hover, :focus, :focus-visible, :active) {
+  border-color: #a8a8a2 !important;
+  background: #fafaf8 !important;
+  background-color: #fafaf8 !important;
+}
+
+.run-lab-calculator__stepper {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  gap: 6px;
+  align-items: center;
+}
+
+.run-lab-calculator__stepper input {
+  min-width: 0;
+  text-align: center;
+}
+
+/* UX-14: keep hundredths (e.g. 15.75) visible in the seconds field */
+.run-lab-calculator__field--seconds .run-lab-calculator__stepper {
+  grid-template-columns: 44px minmax(4.5ch, 1fr) 44px;
+}
+
+.run-lab-calculator__field--seconds .run-lab-calculator__stepper input {
+  min-width: 4.5ch;
+  width: 100%;
+}
+
+.run-lab-calculator__stepper-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
   color: var(--color-text);
-  background: transparent;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--color-white);
   border: 1px solid #c9c9c4;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.run-lab-calculator__stepper-btn:hover {
+  border-color: #111111;
+}
+
+/*
+  Minutes + seconds stay side-by-side (default .row).
+  When Hours is shown, stack all three — three steppers across the panel clip.
+*/
+.run-lab-calculator__row--time-3 {
+  grid-template-columns: 1fr;
+}
+
+.run-lab-calculator__row--time-3 .run-lab-calculator__stepper {
+  grid-template-columns: 44px minmax(3.5ch, 1fr) 44px;
+}
+
+.run-lab-calculator__row--time-3 .run-lab-calculator__stepper input {
+  min-width: 3.5ch;
+}
+
+.run-lab-calculator__attribution {
+  margin: 6px 0 0;
+  color: #bdbdbd;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .run-lab-calculator__result {
@@ -555,7 +671,12 @@
   .run-lab-calculator__panel {
     max-width: 100%;
   }
+
+  .run-lab-calculator__disclaimer {
+    padding: 16px 20px 22px;
+  }
 }
+
 
 @media (max-width: 520px) {
   .run-lab-calculator {

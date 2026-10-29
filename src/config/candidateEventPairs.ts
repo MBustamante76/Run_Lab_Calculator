@@ -1,15 +1,12 @@
 /**
- * Candidate middle-distance directions awaiting methodology approval.
- * Not enabled in production. Used only for softer unsupported UI copy.
+ * Candidate middle-distance directions that still lack an approved empirical
+ * event-pair coefficient. Routes covered by the Riegel power-law fallback are
+ * not listed here — they return a general one-PB estimate instead of this notice.
+ *
+ * Kept empty while power law covers 400–1500m pairs; re-add only when a
+ * direction should show the soft “not supported yet” notice without a time.
  */
-export const candidateEventPairs = [
-  ["400", "800"],
-  ["800", "400"],
-  ["600", "800"],
-  ["800", "600"],
-  ["800", "1500"],
-  ["1500", "800"],
-] as const;
+export const candidateEventPairs: ReadonlyArray<readonly [string, string]> = [];
 
 export const candidatePairingNotice = "This event pairing isn't supported yet.";
 

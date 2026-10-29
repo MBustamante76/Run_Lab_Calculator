@@ -31,9 +31,10 @@ describe("race metrics", () => {
   it("calculates 800 m in 2:00", () => {
     const metrics = metricsFor("800", 2, 0);
     const byDistance = new Map(metrics.rhythms.map((rhythm) => [rhythm.metres, rhythm.milliseconds]));
-    expect(formatSplit(byDistance.get(100) ?? 0)).toBe("15.0");
-    expect(formatSplit(byDistance.get(200) ?? 0)).toBe("30.0");
+    expect(formatSplit(byDistance.get(100) ?? 0)).toBe("15.0s");
+    expect(formatSplit(byDistance.get(200) ?? 0)).toBe("30.0s");
     expect(formatSplit(byDistance.get(400) ?? 0)).toBe("1:00.0");
+
   });
 
   it("uses the mile constant for mile pace", () => {
@@ -55,14 +56,18 @@ describe("race metrics", () => {
   it("reports the checkpoint fixtures", () => {
     const lines = engineDiagnosticsLines();
     expect(lines).toContain("mile | 1 Mile | 1609.344 m | middle | predict, pace, finish | splits 400 | route middle");
+    expect(lines).toContain("100 | 100m | 100 m | sprint | predict, pace, finish | splits 100 | route sprint");
+    expect(lines).toContain("10k | 10K | 10000 m | long | predict, pace, finish | splits 400 | route long");
+
     expect(lines).toContain("Total time: 1200 s");
     expect(lines).toContain("Pace per km: 4:00");
     expect(lines).toContain("Pace per mile: 6:26");
     expect(lines).toContain("Speed: 15.00 km/h");
     expect(lines).toContain("Average 400 m: 1:36.0");
-    expect(lines).toContain("Average 100 m: 15.0");
-    expect(lines).toContain("Average 200 m: 30.0");
+    expect(lines).toContain("Average 100 m: 15.0s");
+    expect(lines).toContain("Average 200 m: 30.0s");
     expect(lines).toContain("Average 400 m: 1:00.0");
+
     expect(lines).toContain("Invalid seconds: Seconds must be less than 60.");
     expect(lines).toContain("Rounding carry: 1:00.0");
     expect(lines.join("\n")).not.toContain(":60");

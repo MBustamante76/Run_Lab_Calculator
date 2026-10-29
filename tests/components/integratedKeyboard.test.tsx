@@ -35,11 +35,26 @@ describe("integrated calculator keyboard", () => {
     await user.tab();
     expect(screen.getByLabelText("Race distance")).toHaveFocus();
     await user.tab();
+    expect(screen.getByRole("button", { name: "Decrease hours" })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByLabelText("Hours")).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Increase hours" })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Decrease minutes" })).toHaveFocus();
+    await user.tab();
     const minutes = screen.getByLabelText("Minutes");
     expect(minutes).toHaveFocus();
     await user.keyboard("20");
     await user.tab();
+    expect(screen.getByRole("button", { name: "Increase minutes" })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Decrease seconds" })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByLabelText("Seconds")).toHaveFocus();
     await user.keyboard("0");
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Increase seconds" })).toHaveFocus();
     await user.tab();
     expect(screen.getByRole("button", { name: "Calculate my result" })).toHaveFocus();
     await user.keyboard("{Enter}");
@@ -48,11 +63,13 @@ describe("integrated calculator keyboard", () => {
     await user.tab();
     expect(screen.getByRole("button", { name: "Reset" })).toHaveFocus();
     await user.keyboard("{Enter}");
-    expect(screen.getByLabelText("Minutes")).toHaveValue("");
+    expect(screen.getByLabelText("Minutes")).toHaveValue("22");
     expect(screen.queryByText("Pace per km")).not.toBeInTheDocument();
+
 
     await user.tab();
     expect(screen.getByRole("button", { name: "Reset" })).not.toHaveFocus();
     expect(document.body.contains(document.activeElement)).toBe(true);
   });
 });
+

@@ -30,12 +30,14 @@ describe("approved production configuration", () => {
     expect(predictionConfig.eventPairs).toEqual([]);
   });
 
-  it("limits the power law to 1500m and longer, excluding 800m", () => {
-    for (const eventId of [...predictionConfig.powerLaw.sourceEventIds, ...predictionConfig.powerLaw.targetEventIds]) {
-      expect(eventById(eventId)?.metres, eventId).toBeGreaterThanOrEqual(1500);
+  it("includes middle distances in the power-law lists while keeping pure sprints out", () => {
+    expect(predictionConfig.powerLaw.sourceEventIds).toContain("400");
+    expect(predictionConfig.powerLaw.sourceEventIds).toContain("800");
+    expect(predictionConfig.powerLaw.sourceEventIds).not.toContain("100");
+    expect(predictionConfig.powerLaw.sourceEventIds).not.toContain("200");
+    for (const eventId of predictionConfig.powerLaw.sourceEventIds) {
+      expect(eventById(eventId)?.metres, eventId).toBeGreaterThanOrEqual(400);
     }
-    expect(predictionConfig.powerLaw.sourceEventIds).not.toContain("800");
-    expect(predictionConfig.powerLaw.targetEventIds).not.toContain("800");
   });
 
   it("keeps 800m available as a PB and a target", () => {
@@ -45,11 +47,21 @@ describe("approved production configuration", () => {
     expect(predictPerformance({ performances: [sprint200, middle800], targetEventId: "400" }).status).toBe("success");
   });
 
-  it("returns no time for an 800m PB alone", () => {
+  it("estimates 1500m 4:30 to 800m as 2:18.7 with the general one-PB caveat", () => {
+    const result = predictPerformance({ performances: [pb1500], targetEventId: "800" });
+    expect(result.status).toBe("success");
+    if (result.status === "success") {
+      expect(result.methodId).toBe("power-law");
+      expect(result.displayTime).toBe("2:18.7");
+      expect(result.warnings.some((warning) => warning.message.includes("General estimate from one PB"))).toBe(true);
+    }
+  });
+
+  it("estimates an 800m PB alone toward nearby middle distances", () => {
     for (const targetEventId of ["400", "1500", "3000"]) {
       const result = predictPerformance({ performances: [middle800], targetEventId });
-      expect(result.status, targetEventId).toBe("unsupported");
-      expect(result).not.toHaveProperty("predictedTimeMilliseconds");
+      expect(result.status, targetEventId).toBe("success");
+      expect(result).toHaveProperty("predictedTimeMilliseconds");
     }
   });
 
@@ -90,7 +102,7 @@ describe("prediction router", () => {
     expect(result.status).toBe("success");
     if (result.status === "success") {
       expect(result.methodId).toBe("power-law");
-      expect(result.displayTime).toBe("9:22.9");
+      expect(result.displayTime).toBe("9:23");
       expect(result.isEstimatedEquivalent).toBe(true);
       expect(result.explanation).toBe("Estimated from your 1500m PB of 4:30.0, scaled to 3000m.");
       expect(result.warnings.map((warning) => warning.code)).toEqual(["model-assumption"]);
@@ -99,8 +111,23 @@ describe("prediction router", () => {
 
   it("predicts 5000m to 10K", () => {
     const result = predictPerformance({ performances: [pb5000], targetEventId: "10k" });
-    expect(result.status === "success" && result.displayTime).toBe("37:31.7");
+    expect(result.status === "success" && result.displayTime).toBe("37:32");
   });
+
+  it("keeps full internal precision for decimal-second inputs on a supported route", () => {
+    const result = predictPerformance({
+      performances: [{ eventId: "800", milliseconds: 135_750 }],
+      targetEventId: "1500",
+    });
+    expect(result.status).toBe("success");
+    if (result.status === "success") {
+      // 2:15.75 → 1500m via Riegel; stored ms must retain input fraction, not display rounding.
+      expect(result.sourcePerformances[0]?.milliseconds).toBe(135_750);
+      expect(result.predictedTimeMilliseconds).toBeCloseTo(135_750 * (1500 / 800) ** 1.06, 5);
+      expect(Number.isInteger(result.predictedTimeMilliseconds)).toBe(false);
+    }
+  });
+
 
   it("uses a draft method only during review, and flags it", () => {
     const draft: PredictionConfig = {

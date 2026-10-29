@@ -7,3 +7,6 @@ releases/
 wordpress/run-lab-calculator/assets/
 local/
 .vitest/
+/playwright-report/
+/test-results/
+/blob-report/

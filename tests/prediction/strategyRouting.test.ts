@@ -9,8 +9,19 @@ import { approvedOnePbRouteMatrix } from "./approvedRouteMatrix";
 
 type StrategyClass = "UNSUPPORTED" | "EVENT_PAIR" | "POWER_LAW" | "TWO_PB_INTERPOLATION";
 
-const powerLawLabels = ["1500m", "1 Mile", "2000m", "3000m", "5000m", "10K"] as const;
-const belowPowerLawLabels = ["100m", "200m", "400m", "600m", "800m", "1000m"] as const;
+const powerLawLabels = [
+  "400m",
+  "600m",
+  "800m",
+  "1000m",
+  "1500m",
+  "1 Mile",
+  "2000m",
+  "3000m",
+  "5000m",
+  "10K",
+] as const;
+const sprintOnlyLabels = ["100m", "200m"] as const;
 
 function idFor(label: string): string {
   const event = events.find((candidate) => candidate.label === label);
@@ -98,30 +109,18 @@ describe("approved one-PB route matrix", () => {
 
 describe("power-law split", () => {
   const permitted = [
+    ["1500m", "800m"],
+    ["800m", "1500m"],
+    ["400m", "800m"],
+    ["800m", "400m"],
+    ["600m", "800m"],
+    ["800m", "600m"],
     ["1500m", "1 Mile"],
     ["1500m", "2000m"],
     ["1500m", "3000m"],
     ["1500m", "5000m"],
-    ["1 Mile", "1500m"],
-    ["1 Mile", "2000m"],
-    ["1 Mile", "3000m"],
-    ["1 Mile", "5000m"],
-    ["2000m", "1500m"],
-    ["2000m", "1 Mile"],
-    ["2000m", "3000m"],
-    ["2000m", "5000m"],
-    ["3000m", "1500m"],
-    ["3000m", "1 Mile"],
-    ["3000m", "2000m"],
-    ["3000m", "5000m"],
     ["3000m", "10K"],
-    ["5000m", "1500m"],
-    ["5000m", "1 Mile"],
-    ["5000m", "2000m"],
-    ["5000m", "3000m"],
     ["5000m", "10K"],
-    ["10K", "3000m"],
-    ["10K", "5000m"],
   ] as const;
 
   it.each(permitted)("%s -> %s uses power law", (source, target) => {
@@ -135,82 +134,59 @@ describe("power-law split", () => {
     ["10K", "1 Mile"],
     ["2000m", "10K"],
     ["10K", "2000m"],
+    ["800m", "5000m"],
+    ["5000m", "800m"],
   ] as const)("%s -> %s stays unsupported when the ratio is above 4", (source, target) => {
     expect(distanceRatio(eventById(idFor(source)).metres, eventById(idFor(target)).metres)).toBeGreaterThan(4);
     expect(onePb(source, target)).toBe("UNSUPPORTED");
   });
 
-  it("classifies every 1500m-and-longer pair from the ratio, in both orders", () => {
+  it("classifies configured power-law pairs from the ratio, respecting sprint-to-long blocks", () => {
     for (const source of powerLawLabels) {
       for (const target of powerLawLabels) {
         if (source === target) {
           continue;
         }
-        const ratio = distanceRatio(eventById(idFor(source)).metres, eventById(idFor(target)).metres);
-        const expected = ratio <= predictionConfig.powerLaw.maximumDistanceRatio ? "POWER_LAW" : "UNSUPPORTED";
+        const sourceEvent = eventById(idFor(source));
+        const targetEvent = eventById(idFor(target));
+        const ratio = distanceRatio(sourceEvent.metres, targetEvent.metres);
+        const sprintToLong = sourceEvent.group === "sprint" && targetEvent.group === "long";
+        const expected =
+          !sprintToLong && ratio <= predictionConfig.powerLaw.maximumDistanceRatio
+            ? "POWER_LAW"
+            : "UNSUPPORTED";
         expect(onePb(source, target), `${source} -> ${target}`).toBe(expected);
-        expect(onePb(target, source), `${target} -> ${source}`).toBe(expected);
+      }
+    }
+  });
+
+  it("keeps pure sprint PBs outside the power-law lists", () => {
+    expect(predictionConfig.powerLaw.sourceEventIds).not.toContain("100");
+    expect(predictionConfig.powerLaw.sourceEventIds).not.toContain("200");
+    for (const source of sprintOnlyLabels) {
+      for (const target of events) {
+        if (target.label === source) {
+          continue;
+        }
+        expect(onePb(source, target.label), `${source} -> ${target.label}`).toBe("UNSUPPORTED");
       }
     }
   });
 });
 
-describe("800m and 1000m transition events", () => {
-  it.each([
-    ["800m", "1500m"],
-    ["800m", "3000m"],
-    ["800m", "5000m"],
-    ["800m", "10K"],
-    ["1500m", "800m"],
-    ["3000m", "800m"],
-    ["5000m", "800m"],
-    ["10K", "800m"],
-    ["1000m", "1500m"],
-    ["1000m", "3000m"],
-    ["1000m", "5000m"],
-    ["1500m", "1000m"],
-    ["3000m", "1000m"],
-    ["5000m", "1000m"],
-  ] as const)("%s -> %s is unsupported", (source, target) => {
-    expect(onePb(source, target)).toBe("UNSUPPORTED");
-  });
-
-  it("does not treat 800m or 1000m as a 1500m-and-longer distance", () => {
-    expect(eventById("800").metres).toBe(800);
-    expect(eventById("1000").metres).toBe(1000);
-    expect(predictionConfig.powerLaw.sourceEventIds).not.toContain("800");
-    expect(predictionConfig.powerLaw.sourceEventIds).not.toContain("1000");
-    expect(predictionConfig.powerLaw.targetEventIds).not.toContain("800");
-    expect(predictionConfig.powerLaw.targetEventIds).not.toContain("1000");
-  });
-});
-
-describe("single PBs below 1500m", () => {
-  const cases = belowPowerLawLabels.flatMap((source) =>
-    events
-      .filter((target) => target.label !== source)
-      .map((target) => ({ source, target: target.label })),
-  );
-
-  it.each(cases)("$source -> $target is unsupported", ({ source, target }) => {
-    expect(onePb(source, target)).toBe("UNSUPPORTED");
-  });
-});
-
 /**
  * This test injects a temporary event-pair route to verify routing precedence.
- * 800m -> 1500m is NOT enabled in the production V1 configuration.
- * No production event-pair coefficients are currently approved.
- * The 1500m -> 3000m pair below is injected the same way.
+ * Production uses power law for 800m <-> 1500m (prototype Riegel). Event pairs remain empty.
+ * The injected pair below only proves precedence when an event-pair coefficient is configured.
  */
 describe("event-pair precedence", () => {
   const eightHundredToFifteen = withPairs([oneWayPair("800m", "1500m")]);
 
-  it("uses an enabled one-way pair and does not invent the reverse", () => {
+  it("uses an enabled one-way pair ahead of power law and does not invent the reverse", () => {
     expect(predictionConfig.eventPairs).toEqual([]);
-    expect(onePb("800m", "1500m")).toBe("UNSUPPORTED");
+    expect(onePb("800m", "1500m")).toBe("POWER_LAW");
     expect(onePb("800m", "1500m", eightHundredToFifteen)).toBe("EVENT_PAIR");
-    expect(onePb("1500m", "800m", eightHundredToFifteen)).toBe("UNSUPPORTED");
+    expect(onePb("1500m", "800m", eightHundredToFifteen)).toBe("POWER_LAW");
   });
 
   it("prefers an exact event pair to the power-law fallback", () => {
@@ -240,9 +216,9 @@ describe("two-PB routing split", () => {
 
   it.each([
     ["200m", "800m", "100m", "UNSUPPORTED"],
-    ["200m", "800m", "1500m", "UNSUPPORTED"],
+    ["200m", "800m", "1500m", "POWER_LAW"],
     ["200m", "800m", "5000m", "UNSUPPORTED"],
-    ["1500m", "5000m", "800m", "UNSUPPORTED"],
+    ["1500m", "5000m", "800m", "POWER_LAW"],
     ["1500m", "5000m", "10K", "POWER_LAW"],
   ] as const)("%s + %s -> %s does not use the personal curve", (first, second, target, expected) => {
     expect(twoPb(first, second, target)).toBe(expected);
@@ -288,9 +264,9 @@ describe("interpolation span boundary", () => {
     ["200m", "800m", "400m", 4, "TWO_PB_INTERPOLATION"],
     ["400m", "1500m", "800m", 3.75, "TWO_PB_INTERPOLATION"],
     ["800m", "3000m", "1500m", 3.75, "TWO_PB_INTERPOLATION"],
-    ["200m", "1000m", "400m", 5, "UNSUPPORTED"],
-    ["400m", "2000m", "800m", 5, "UNSUPPORTED"],
-    ["800m", "5000m", "1000m", 6.25, "UNSUPPORTED"],
+    ["200m", "1000m", "400m", 5, "POWER_LAW"],
+    ["400m", "2000m", "800m", 5, "POWER_LAW"],
+    ["800m", "5000m", "1000m", 6.25, "POWER_LAW"],
     ["1500m", "10K", "3000m", 10_000 / 1500, "POWER_LAW"],
   ] as const)("%s + %s -> %s respects the %s span", (first, second, target, ratio, expected) => {
     expect(distanceRatio(eventById(idFor(first)).metres, eventById(idFor(second)).metres)).toBeCloseTo(ratio, 5);
@@ -326,12 +302,34 @@ describe("routing thresholds come from configuration", () => {
   it("pins the approved limits and the power-law event lists", () => {
     expect(predictionConfig.interpolation.maximumAnchorRatio).toBe(4);
     expect(predictionConfig.powerLaw.maximumDistanceRatio).toBe(4);
-    expect(predictionConfig.powerLaw.sourceEventIds).toEqual(["1500", "mile", "2000", "3000", "5000", "10k"]);
-    expect(predictionConfig.powerLaw.targetEventIds).toEqual(["1500", "mile", "2000", "3000", "5000", "10k"]);
+    expect(predictionConfig.powerLaw.sourceEventIds).toEqual([
+      "400",
+      "600",
+      "800",
+      "1000",
+      "1500",
+      "mile",
+      "2000",
+      "3000",
+      "5000",
+      "10k",
+    ]);
+    expect(predictionConfig.powerLaw.targetEventIds).toEqual([
+      "400",
+      "600",
+      "800",
+      "1000",
+      "1500",
+      "mile",
+      "2000",
+      "3000",
+      "5000",
+      "10k",
+    ]);
     expect(predictionConfig.eventPairs).toEqual([]);
   });
 
-  it("follows a different power-law ratio and event list without a hardcoded 1500m cutoff", () => {
+  it("follows a different power-law ratio without inventing routes outside the lists", () => {
     const widerRatio: PredictionConfig = {
       ...predictionConfig,
       powerLaw: { ...predictionConfig.powerLaw, maximumDistanceRatio: 7 },
@@ -339,16 +337,16 @@ describe("routing thresholds come from configuration", () => {
     expect(onePb("1500m", "10K", widerRatio)).toBe("POWER_LAW");
     expect(onePb("1500m", "10K")).toBe("UNSUPPORTED");
 
-    const includeEightHundred: PredictionConfig = {
+    const withoutEightHundred: PredictionConfig = {
       ...predictionConfig,
       powerLaw: {
         ...predictionConfig.powerLaw,
-        sourceEventIds: [...predictionConfig.powerLaw.sourceEventIds, "800"],
-        targetEventIds: [...predictionConfig.powerLaw.targetEventIds, "800"],
+        sourceEventIds: predictionConfig.powerLaw.sourceEventIds.filter((id) => id !== "800"),
+        targetEventIds: predictionConfig.powerLaw.targetEventIds.filter((id) => id !== "800"),
       },
     };
-    expect(onePb("800m", "1500m", includeEightHundred)).toBe("POWER_LAW");
-    expect(onePb("800m", "1500m")).toBe("UNSUPPORTED");
+    expect(onePb("800m", "1500m", withoutEightHundred)).toBe("UNSUPPORTED");
+    expect(onePb("800m", "1500m")).toBe("POWER_LAW");
   });
 
   it("follows a tighter interpolation span", () => {
@@ -356,7 +354,9 @@ describe("routing thresholds come from configuration", () => {
       ...predictionConfig,
       interpolation: { ...predictionConfig.interpolation, maximumAnchorRatio: 3.9 },
     };
-    expect(twoPb("200m", "800m", "400m", tighter)).toBe("UNSUPPORTED");
+    // Anchors at ratio 4 exceed the tighter span, so interpolation yields; nearest PB may still power-law.
+    expect(twoPb("200m", "800m", "400m", tighter)).toBe("POWER_LAW");
     expect(twoPb("200m", "800m", "400m")).toBe("TWO_PB_INTERPOLATION");
   });
 });
+

@@ -51,12 +51,12 @@ export function splitDistancesFor(metres: number): readonly RhythmMetres[] {
   return candidates.filter((split) => split <= metres);
 }
 
-export function supportedToolsFor(metres: number): readonly CalculationToolId[] {
-  if (metres === 100 || metres === 200 || metres === METRES_PER_10K) {
-    return ["predict"];
-  }
+export function supportedToolsFor(): readonly CalculationToolId[] {
+  // All catalogue distances, including 100m/200m and 10K, are available on Tools 01–03
+  // (sprint average-pace caveats live in tool copy / result notes).
   return ["predict", "pace", "finish"];
 }
+
 
 export const events: readonly EventDefinition[] = catalogue.map(([id, label, metres]) => {
   const group = eventGroupFor(metres);
@@ -65,7 +65,7 @@ export const events: readonly EventDefinition[] = catalogue.map(([id, label, met
     label,
     metres,
     group,
-    supportedToolIds: supportedToolsFor(metres),
+    supportedToolIds: supportedToolsFor(),
     splitMetres: splitDistancesFor(metres),
     prediction: { route: group },
   };

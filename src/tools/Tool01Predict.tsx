@@ -11,6 +11,7 @@ import {
   candidatePairingNotice,
   isCandidateEventPair,
 } from "../config/candidateEventPairs";
+import { defaultTimeForEvent } from "../config/defaultTimes";
 import { DistanceSelect } from "../fields/DistanceSelect";
 import { StructuredTimeInput } from "../fields/StructuredTimeInput";
 
@@ -27,16 +28,21 @@ type PredictForm = {
   targetEventId: string;
 };
 
-const emptyForm: PredictForm = {
-  firstEventId: "1500",
-  firstMinutes: "",
-  firstSeconds: "",
-  secondEnabled: false,
-  secondEventId: "800",
-  secondMinutes: "",
-  secondSeconds: "",
-  targetEventId: "3000",
-};
+function initialForm(): PredictForm {
+  const first = defaultTimeForEvent("1500");
+  const second = defaultTimeForEvent("800");
+  return {
+    firstEventId: "1500",
+    firstMinutes: first.minutes,
+    firstSeconds: first.seconds,
+    secondEnabled: false,
+    secondEventId: "800",
+    secondMinutes: second.minutes,
+    secondSeconds: second.seconds,
+    targetEventId: "3000",
+  };
+}
+
 
 type Outcome =
   | { status: "success"; result: PredictionSuccess; metrics: RaceMetrics }
@@ -81,7 +87,8 @@ function unsupportedMessageFor(
 }
 
 export function Tool01Predict() {
-  const [form, setForm] = useState<PredictForm>(emptyForm);
+  const [form, setForm] = useState<PredictForm>(() => initialForm());
+
   const [errors, setErrors] = useState<readonly ValidationError[]>([]);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
 
@@ -149,10 +156,21 @@ export function Tool01Predict() {
   }
 
   function reset() {
-    setForm(emptyForm);
+    setForm(initialForm());
     setErrors([]);
     setOutcome(null);
   }
+
+  function setFirstDistance(firstEventId: string) {
+    const time = defaultTimeForEvent(firstEventId);
+    update({ ...form, firstEventId, firstMinutes: time.minutes, firstSeconds: time.seconds });
+  }
+
+  function setSecondDistance(secondEventId: string) {
+    const time = defaultTimeForEvent(secondEventId);
+    update({ ...form, secondEventId, secondMinutes: time.minutes, secondSeconds: time.seconds });
+  }
+
 
   const targetEvents = predictEvents.filter(
     (event) => event.id !== form.firstEventId && (!form.secondEnabled || event.id !== form.secondEventId),
@@ -180,7 +198,7 @@ export function Tool01Predict() {
             events={predictEvents}
             value={form.firstEventId}
             error={messageFor(errors, "firstEvent")}
-            onChange={(firstEventId) => update({ ...form, firstEventId })}
+            onChange={setFirstDistance}
           />
           <fieldset className="run-lab-calculator__time">
             <legend>PB time</legend>
@@ -192,7 +210,11 @@ export function Tool01Predict() {
               secondsError={messageFor(errors, "firstSeconds") ?? messageFor(errors, "firstTime")}
               onMinutesChange={(firstMinutes) => update({ ...form, firstMinutes })}
               onSecondsChange={(firstSeconds) => update({ ...form, firstSeconds })}
+              onTimePartsChange={(parts) =>
+                update({ ...form, firstMinutes: parts.minutes, firstSeconds: parts.seconds })
+              }
             />
+
           </fieldset>
         </div>
         {form.secondEnabled ? (
@@ -204,7 +226,7 @@ export function Tool01Predict() {
               events={secondEvents}
               value={form.secondEventId}
               error={messageFor(errors, "secondEvent")}
-              onChange={(secondEventId) => update({ ...form, secondEventId })}
+              onChange={setSecondDistance}
             />
             <fieldset className="run-lab-calculator__time">
               <legend>Second PB time</legend>
@@ -216,19 +238,24 @@ export function Tool01Predict() {
                 secondsError={messageFor(errors, "secondSeconds") ?? messageFor(errors, "secondTime")}
                 onMinutesChange={(secondMinutes) => update({ ...form, secondMinutes })}
                 onSecondsChange={(secondSeconds) => update({ ...form, secondSeconds })}
+                onTimePartsChange={(parts) =>
+                  update({ ...form, secondMinutes: parts.minutes, secondSeconds: parts.seconds })
+                }
               />
+
             </fieldset>
             <button
               type="button"
               className="run-lab-calculator__reset"
-              onClick={() =>
+              onClick={() => {
+                const time = defaultTimeForEvent(form.secondEventId);
                 update({
                   ...form,
                   secondEnabled: false,
-                  secondMinutes: "",
-                  secondSeconds: "",
-                })
-              }
+                  secondMinutes: time.minutes,
+                  secondSeconds: time.seconds,
+                });
+              }}
             >
               Remove second PB
             </button>
@@ -237,11 +264,20 @@ export function Tool01Predict() {
           <button
             type="button"
             className="run-lab-calculator__reset run-lab-calculator__add"
-            onClick={() => update({ ...form, secondEnabled: true })}
+            onClick={() => {
+              const time = defaultTimeForEvent(form.secondEventId);
+              update({
+                ...form,
+                secondEnabled: true,
+                secondMinutes: time.minutes,
+                secondSeconds: time.seconds,
+              });
+            }}
           >
             + Add another PB
           </button>
         )}
+
       </div>
       <DistanceSelect
         id="predict-target"

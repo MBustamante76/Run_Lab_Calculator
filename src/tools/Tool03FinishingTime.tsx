@@ -13,6 +13,7 @@ const finishEvents = events.filter((event) => event.supportedToolIds.includes("f
 type FinishForm = {
   eventId: string;
   unit: PaceUnit;
+  hours: string;
   minutes: string;
   seconds: string;
 };
@@ -20,6 +21,7 @@ type FinishForm = {
 const emptyForm: FinishForm = {
   eventId: "3000",
   unit: "kilometre",
+  hours: "",
   minutes: "",
   seconds: "",
 };
@@ -37,6 +39,7 @@ export function Tool03FinishingTime() {
 
   function calculate() {
     const parsed = parseStructuredTime({
+      hours: readStructuredNumber(form.hours),
       minutes: readStructuredNumber(form.minutes),
       seconds: readStructuredNumber(form.seconds),
     });
@@ -116,15 +119,30 @@ export function Tool03FinishingTime() {
           Per mile
         </label>
       </fieldset>
-      <StructuredTimeInput
-        idPrefix="finish"
-        minutes={form.minutes}
-        seconds={form.seconds}
-        minutesError={messageFor(errors, "minutes")}
-        secondsError={messageFor(errors, "seconds")}
-        onMinutesChange={(minutes) => setForm((current) => ({ ...current, minutes }))}
-        onSecondsChange={(seconds) => setForm((current) => ({ ...current, seconds }))}
-      />
+      <fieldset className="run-lab-calculator__time">
+        <legend>Average pace</legend>
+        <StructuredTimeInput
+          idPrefix="finish"
+          showHours
+          hours={form.hours}
+          minutes={form.minutes}
+          seconds={form.seconds}
+          hoursError={messageFor(errors, "hours")}
+          minutesError={messageFor(errors, "minutes")}
+          secondsError={messageFor(errors, "seconds")}
+          onHoursChange={(hours) => setForm((current) => ({ ...current, hours }))}
+          onMinutesChange={(minutes) => setForm((current) => ({ ...current, minutes }))}
+          onSecondsChange={(seconds) => setForm((current) => ({ ...current, seconds }))}
+          onTimePartsChange={(parts) =>
+            setForm((current) => ({
+              ...current,
+              hours: parts.hours ?? "",
+              minutes: parts.minutes,
+              seconds: parts.seconds,
+            }))
+          }
+        />
+      </fieldset>
       <div className="run-lab-calculator__actions">
         <button type="submit" className="run-lab-calculator__go">
           Calculate my result

@@ -39,6 +39,11 @@ describe("finishing time", () => {
     expect(formatFinishTime(480_000)).toBe("8:00");
   });
 
+  it("formats sub-minute finishing times with a seconds suffix", () => {
+    expect(formatFinishTime(12_500)).toBe("12.5s");
+    expect(formatFinishTime(25_000)).toBe("25.0s");
+  });
+
   it("matches a kilometre pace with the equivalent mile pace", () => {
     const pacePerKilometre = pace(5, 0);
     const pacePerMile = pacePerKilometre * (METRES_PER_MILE / METRES_PER_KILOMETRE);

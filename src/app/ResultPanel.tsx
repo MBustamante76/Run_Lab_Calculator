@@ -4,10 +4,11 @@ import { Metric } from "./Metric";
 
 type ResultPanelProps = {
   metrics: RaceMetrics;
+  sprintAverages?: boolean;
 };
 
-export function ResultPanel({ metrics }: ResultPanelProps) {
-  const presented = presentRaceMetrics(metrics);
+export function ResultPanel({ metrics, sprintAverages = false }: ResultPanelProps) {
+  const presented = presentRaceMetrics(metrics, { sprintAverages });
 
   return (
     <div className="run-lab-calculator__result" aria-live="polite">

@@ -34,6 +34,26 @@ async function enterAnchors() {
 }
 
 describe("Tool 01 prediction", () => {
+  it("shows approved Sarah purpose copy with concrete distances", () => {
+    render(<RunLabCalculatorApp />);
+    expect(
+      screen.getByText(/Imagine Sarah has a 1500m PB of 5:30[\s\S]*useful guide, not a guarantee/i),
+    ).toBeInTheDocument();
+  });
+
+
+
+  it("steps minutes and seconds from the shared time controls", async () => {
+    render(<RunLabCalculatorApp />);
+    await enterTime("PB time", "1", "59");
+    await user().click(screen.getByRole("button", { name: "Increase seconds" }));
+    expect(timeFields("PB time").minutes).toHaveValue("2");
+    expect(timeFields("PB time").seconds).toHaveValue("0");
+    await user().click(screen.getByRole("button", { name: "Decrease minutes" }));
+    expect(timeFields("PB time").minutes).toHaveValue("1");
+    expect(timeFields("PB time").seconds).toHaveValue("0");
+  });
+
   it("estimates 400m from 200m and 800m and names both anchors", async () => {
     render(<RunLabCalculatorApp />);
     await enterAnchors();
@@ -42,11 +62,14 @@ describe("Tool 01 prediction", () => {
 
     expect(screen.getByText("Estimated equivalent performance").parentElement).toHaveTextContent("57.0");
     expect(screen.getByText("Based on your two PBs")).toBeInTheDocument();
+    expect(
+      screen.getByText("Based on your 200m PB of 25.0 and your 800m PB of 2:10.0."),
+    ).toBeInTheDocument();
     expect(screen.queryByText("1.0.0")).not.toBeInTheDocument();
 
     await user().click(screen.getByRole("button", { name: "How was this calculated?" }));
-    expect(screen.getByText(/200m PB of 25\.0/)).toBeInTheDocument();
-    expect(screen.getByText(/800m PB of 2:10\.0/)).toBeInTheDocument();
+    expect(screen.getAllByText(/200m PB of 25\.0/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/800m PB of 2:10\.0/).length).toBeGreaterThan(0);
   });
 
   it("estimates 600m from the same anchors", async () => {
@@ -81,7 +104,38 @@ describe("Tool 01 prediction", () => {
 
     expect(screen.getByRole("status")).toHaveTextContent("more relevant PB");
     expect(screen.queryByText("Estimated equivalent performance")).not.toBeInTheDocument();
-    expect(screen.queryByText(/\d+:\d+/)).not.toBeInTheDocument();
+    expect(screen.queryByText((_, node) => node?.classList.contains("run-lab-calculator__estimate") ?? false)).not.toBeInTheDocument();
+  });
+
+  it("predicts standalone 5000m to 10K", async () => {
+    render(<RunLabCalculatorApp />);
+    await user().selectOptions(screen.getByLabelText("PB distance"), "5000");
+    await enterTime("PB time", "18", "0");
+    await user().selectOptions(screen.getByLabelText("Target distance"), "10k");
+    await user().click(screen.getByRole("button", { name: "Calculate my result" }));
+
+    expect(screen.getByText("Estimated equivalent performance").parentElement).toHaveTextContent("37:32");
+    expect(screen.getByText("Middle and long-distance scaling")).toBeInTheDocument();
+  });
+
+  it("retains decimal-second precision through a supported middle-distance prediction", async () => {
+    render(<RunLabCalculatorApp />);
+    await user().selectOptions(screen.getByLabelText("PB distance"), "800");
+    await enterTime("PB time", "2", "15.75");
+    await user().selectOptions(screen.getByLabelText("Target distance"), "1500");
+    await user().click(screen.getByRole("button", { name: "Calculate my result" }));
+
+    const engine = predictPerformance({
+      performances: [{ eventId: "800", milliseconds: 135_750 }],
+      targetEventId: "1500",
+    });
+    expect(engine.status).toBe("success");
+    if (engine.status === "success") {
+      expect(screen.getByText("Estimated equivalent performance").parentElement).toHaveTextContent(
+        engine.displayTime,
+      );
+      expect(engine.sourcePerformances[0]?.milliseconds).toBe(135_750);
+    }
   });
 
   it("scales 1500m to 3000m with the friendly label and shared pace", async () => {
@@ -89,8 +143,9 @@ describe("Tool 01 prediction", () => {
     await enterTime("PB time", "4", "30");
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
 
-    expect(screen.getByText("Estimated equivalent performance").parentElement).toHaveTextContent("9:22.9");
+    expect(screen.getByText("Estimated equivalent performance").parentElement).toHaveTextContent("9:23");
     expect(screen.getByText("Middle and long-distance scaling")).toBeInTheDocument();
+
     expect(screen.queryByText("1.06-1.0.0")).not.toBeInTheDocument();
     expect(screen.getByText(/similar level of endurance/)).toBeInTheDocument();
 
@@ -157,6 +212,8 @@ describe("Tool 01 prediction", () => {
     render(<RunLabCalculatorApp />);
     await enterTime("PB time", "4", "30");
     await user().click(screen.getByRole("button", { name: "+ Add another PB" }));
+    await user().clear(timeFields("Second PB time").minutes);
+    await user().clear(timeFields("Second PB time").seconds);
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
 
     expect(screen.getByRole("alert")).toHaveTextContent("Enter the minutes.");
@@ -164,6 +221,17 @@ describe("Tool 01 prediction", () => {
     expect(timeFields("PB time").seconds).toHaveValue("30");
     expect(screen.queryByText("Estimated equivalent performance")).not.toBeInTheDocument();
   });
+
+  it("pre-fills healthy average times for the selected PB distance", async () => {
+    render(<RunLabCalculatorApp />);
+    expect(timeFields("PB time").minutes).toHaveValue("5");
+    expect(timeFields("PB time").seconds).toHaveValue("30");
+
+    await user().selectOptions(screen.getByLabelText("PB distance"), "800");
+    expect(timeFields("PB time").minutes).toHaveValue("2");
+    expect(timeFields("PB time").seconds).toHaveValue("40");
+  });
+
 
   it("keeps PB 1 when the second PB is removed", async () => {
     render(<RunLabCalculatorApp />);
@@ -178,21 +246,19 @@ describe("Tool 01 prediction", () => {
     expect(screen.getByRole("button", { name: "+ Add another PB" })).toBeInTheDocument();
   });
 
-  it("softens unsupported candidate middle-distance pairings without inventing a time", async () => {
+  it("estimates 1500m 4:30 to 800m as 2:18.7 with the general one-PB caveat", async () => {
     render(<RunLabCalculatorApp />);
-    await user().selectOptions(screen.getByLabelText("PB distance"), "800");
-    await enterTime("PB time", "2", "0");
-    await user().selectOptions(screen.getByLabelText("Target distance"), "1500");
+    await user().selectOptions(screen.getByLabelText("PB distance"), "1500");
+    await enterTime("PB time", "4", "30");
+    await user().selectOptions(screen.getByLabelText("Target distance"), "800");
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
 
-    const status = screen.getByRole("status");
-    expect(status).toHaveTextContent(
-      "We need a more relevant PB to estimate this distance reliably. Add a second PB closer to the target distance, or choose a nearer event.",
-    );
-    expect(status).toHaveTextContent("This event pairing isn't supported yet.");
-    expect(screen.queryByText("Estimated equivalent performance")).not.toBeInTheDocument();
-    expect(screen.queryByText("--:--")).not.toBeInTheDocument();
+    expect(screen.getByText("Estimated equivalent performance")).toBeInTheDocument();
+    expect(screen.getByText("2:18.7")).toBeInTheDocument();
+    expect(screen.getByText(/General estimate from one PB/)).toBeInTheDocument();
+    expect(screen.queryByText("This event pairing isn't supported yet.")).not.toBeInTheDocument();
   });
+
 
   it("resets the prediction and clears it when another tool is selected", async () => {
     render(<RunLabCalculatorApp />);
@@ -203,7 +269,9 @@ describe("Tool 01 prediction", () => {
     expect(estimate).toHaveTextContent("57.0");
 
     await user().click(screen.getByRole("button", { name: "Reset" }));
-    expect(timeFields("PB time").minutes).toHaveValue("");
+    expect(timeFields("PB time").minutes).toHaveValue("5");
+    expect(timeFields("PB time").seconds).toHaveValue("30");
+    expect(screen.getByLabelText("PB distance")).toHaveValue("1500");
     expect(screen.queryByLabelText("Second PB distance")).not.toBeInTheDocument();
     expect(screen.queryByText("57.0")).not.toBeInTheDocument();
 
@@ -213,8 +281,9 @@ describe("Tool 01 prediction", () => {
     await user().click(screen.getByRole("radio", { name: /02\s*calculate my race pace/i }));
     await user().click(screen.getByRole("radio", { name: /01\s*predict my times at other distances/i }));
     expect(screen.queryByText("57.0")).not.toBeInTheDocument();
-    expect(timeFields("PB time").minutes).toHaveValue("");
+    expect(timeFields("PB time").minutes).toHaveValue("5");
   });
+
 
   it("keeps the prediction formula out of the form component", () => {
     const source = readFileSync("src/tools/Tool01Predict.tsx", "utf8");

@@ -1,7 +1,7 @@
 {
   "name": "run-lab-calculator",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
     "build": "vite build",
     "package:plugin": "node scripts/package-plugin.mjs",
     "verify": "npm run lint && npm run typecheck && npm test && npm run build && npm run package:plugin"
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.8",

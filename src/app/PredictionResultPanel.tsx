@@ -1,4 +1,6 @@
 import { useId, useState } from "react";
+import { eventById } from "../calculation/events";
+import { formatPerformanceTime } from "../calculation/formatting";
 import { estimatedEquivalentLabel } from "../calculation/prediction/PredictionEngine";
 import type { PredictionSuccess } from "../calculation/prediction/types";
 import { presentRaceMetrics } from "../calculation/raceMetrics";
@@ -10,10 +12,25 @@ type PredictionResultPanelProps = {
   metrics: RaceMetrics;
 };
 
+function pbAttribution(result: PredictionSuccess): string {
+  const parts = result.sourcePerformances.map((performance) => {
+    const label = eventById(performance.eventId).label;
+    return `your ${label} PB of ${formatPerformanceTime(performance.milliseconds)}`;
+  });
+  if (parts.length === 1) {
+    return `Based on ${parts[0]}.`;
+  }
+  if (parts.length === 2) {
+    return `Based on ${parts[0]} and ${parts[1]}.`;
+  }
+  return `Based on ${parts.join(", ")}.`;
+}
+
 export function PredictionResultPanel({ result, metrics }: PredictionResultPanelProps) {
   const presented = presentRaceMetrics(metrics);
   const [open, setOpen] = useState(false);
   const explanationId = useId();
+  const attribution = pbAttribution(result);
 
   return (
     <div className="run-lab-calculator__result" aria-live="polite">
@@ -21,6 +38,7 @@ export function PredictionResultPanel({ result, metrics }: PredictionResultPanel
         <span>{estimatedEquivalentLabel}</span>
         <b>{result.displayTime}</b>
         <p className="run-lab-calculator__method">{result.methodLabel}</p>
+        <p className="run-lab-calculator__attribution">{attribution}</p>
       </div>
       {result.warnings.map((warning) => (
         <p key={warning.code} className="run-lab-calculator__warning">

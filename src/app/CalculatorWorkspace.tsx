@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { workspaceCopy } from "../config/copy";
+import { calculatorDisclaimer, workspaceCopy } from "../config/copy";
 import { findTool, tools } from "../tools/toolDefinitions";
 import type { ToolId } from "../tools/toolTypes";
 import { CalculatorPanel } from "./CalculatorPanel";
@@ -19,6 +19,8 @@ export function CalculatorWorkspace() {
         <ToolSelector tools={tools} selectedId={selectedId} onSelect={setSelectedId} />
         <CalculatorPanel tool={selectedTool} />
       </div>
+      <p className="run-lab-calculator__disclaimer">{calculatorDisclaimer}</p>
     </section>
   );
 }
+

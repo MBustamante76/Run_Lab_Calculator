@@ -123,12 +123,40 @@ describe("Tool 03 finishing time", () => {
     await enterPace(user, "4", "10");
     await user.click(screen.getByRole("button", { name: "Reset" }));
 
+    expect(screen.getByLabelText("Hours")).toHaveValue("");
     expect(screen.getByLabelText("Minutes")).toHaveValue("");
     expect(screen.getByLabelText("Seconds")).toHaveValue("");
     expect(screen.getByLabelText("Race distance")).toHaveValue("3000");
     expect(screen.getByRole("radio", { name: "Per kilometre" })).toBeChecked();
     expect(screen.queryByText("12:30")).not.toBeInTheDocument();
   });
+
+  it("clears validation errors and empty time fields after Reset", async () => {
+    const user = userEvent.setup();
+    render(<RunLabCalculatorApp />);
+    await openFinish(user);
+    await enterPace(user, "4", "60");
+    expect(screen.getByRole("alert")).toHaveTextContent("Seconds must be less than 60.");
+    expect(screen.getByLabelText("Minutes")).toHaveValue("4");
+    expect(screen.getByLabelText("Seconds")).toHaveValue("60");
+
+    await user.click(screen.getByRole("button", { name: "Reset" }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Hours")).toHaveValue("");
+    expect(screen.getByLabelText("Minutes")).toHaveValue("");
+    expect(screen.getByLabelText("Seconds")).toHaveValue("");
+    expect(screen.queryByText("Finishing time")).not.toBeInTheDocument();
+  });
+
+  it("offers 100m, 200m and 10K as finishing distances", async () => {
+    const user = userEvent.setup();
+    render(<RunLabCalculatorApp />);
+    await openFinish(user);
+    expect(screen.getByRole("option", { name: "100m" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "200m" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "10K" })).toBeInTheDocument();
+  });
+
 
   it("does not keep a finishing time after switching tools", async () => {
     const user = userEvent.setup();

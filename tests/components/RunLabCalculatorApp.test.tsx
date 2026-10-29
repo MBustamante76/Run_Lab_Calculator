@@ -2,7 +2,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { RunLabCalculatorApp } from "../../src/app/RunLabCalculatorApp";
+import { calculatorDisclaimer } from "../../src/config/copy";
 import { tools } from "../../src/tools/toolDefinitions";
+
 
 function choice(name: RegExp) {
   return screen.getByRole("radio", { name });
@@ -39,7 +41,9 @@ describe("calculator shell", () => {
     expect(screen.queryByText(/NaN|10:59|estimated equivalent/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /book a consultation/i })).not.toBeInTheDocument();
+    expect(screen.getByText(calculatorDisclaimer)).toBeInTheDocument();
   });
+
 
   it("switches the active panel among the enabled tools", async () => {
     const user = userEvent.setup();
@@ -65,6 +69,8 @@ describe("calculator shell", () => {
     purpose.focus();
     await user.keyboard("{Enter}");
     expect(purpose).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByText(/equivalent performance at another distance/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Imagine Sarah has a 1500m PB of 5:30/i)).not.toBeInTheDocument();
+    expect(screen.getByText(calculatorDisclaimer)).toBeInTheDocument();
   });
 });
+

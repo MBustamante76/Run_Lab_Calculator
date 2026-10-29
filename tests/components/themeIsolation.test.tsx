@@ -30,15 +30,21 @@ describe("theme isolation", () => {
     const panelHeading = screen.getByRole("heading", { name: "Predict my times at other distances" });
     const workspaceHeading = screen.getByRole("heading", { name: "I want to…" });
     const calculate = screen.getByRole("button", { name: "Calculate my result" });
+    const reset = screen.getByRole("button", { name: "Reset" });
     const distance = screen.getByLabelText("PB distance");
 
     expect(colour(heading, "color")).toBe("var(--color-text)");
     expect(colour(heading, "text-transform")).toBe("uppercase");
     expect(colour(panelHeading, "color")).toBe("var(--color-text)");
     expect(colour(workspaceHeading, "color")).toBe("var(--color-white)");
-    expect(colour(calculate, "background")).toContain("--color-accent");
+    const calculateBackground =
+      colour(calculate, "background-color") || colour(calculate, "background");
+    expect(["rgb(255, 180, 0)", "rgba(255, 180, 0, 1)"]).toContain(calculateBackground);
     expect(colour(calculate, "color")).toBe("rgb(17, 17, 17)");
     expect(colour(calculate, "min-height")).toBe("48px");
+    const resetBackground = colour(reset, "background-color") || colour(reset, "background");
+    expect(["rgb(255, 255, 255)", "rgba(255, 255, 255, 1)"]).toContain(resetBackground);
+    expect(colour(reset, "border-top-color") || colour(reset, "border-color")).not.toBe("");
     expect(colour(distance, "background")).toContain("--color-white");
     expect(colour(distance, "color")).toBe("var(--color-text)");
     expect(colour(distance, "width")).toBe("100%");

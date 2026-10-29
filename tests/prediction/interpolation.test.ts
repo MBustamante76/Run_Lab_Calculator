@@ -55,15 +55,20 @@ describe("two-PB interpolation", () => {
 
   it("allows anchors exactly four times apart and refuses anchors further apart", () => {
     const pb1000 = { eventId: "1000", milliseconds: 170_000 };
-    expect(predictPerformance({ performances: [sprint200, middle800], targetEventId: "400" }).status).toBe("success");
-    expect(predictPerformance({ performances: [sprint200, pb1000], targetEventId: "400" }).status).toBe("unsupported");
-    expect(
-      predictPerformance({
-        performances: [sprint200, { eventId: "1500", milliseconds: 270_000 }],
-        targetEventId: "800",
-      }).status,
-    ).toBe("unsupported");
+    const withinSpan = predictPerformance({ performances: [sprint200, middle800], targetEventId: "400" });
+    expect(withinSpan.status === "success" && withinSpan.methodId).toBe("two-pb-interpolation");
+
+    // Ratio 5 blocks interpolation; nearest PB may still use the power-law fallback.
+    const wideTo400 = predictPerformance({ performances: [sprint200, pb1000], targetEventId: "400" });
+    expect(wideTo400.status === "success" && wideTo400.methodId).toBe("power-law");
+
+    const wideTo800 = predictPerformance({
+      performances: [sprint200, { eventId: "1500", milliseconds: 270_000 }],
+      targetEventId: "800",
+    });
+    expect(wideTo800.status === "success" && wideTo800.methodId).toBe("power-law");
   });
+
 
   it("does not extend the 200m and 800m relationship to 5000m", () => {
     const result = predictPerformance({ performances: [sprint200, middle800], targetEventId: "5000" });
