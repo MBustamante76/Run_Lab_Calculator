@@ -28,9 +28,16 @@ describe("event configuration", () => {
     expect(countLiteral("src/calculation", "export const events")).toBe(1);
   });
 
-  it("opens all catalogue distances to predict, pace and finish", () => {
+  it("opens all catalogue distances to tools 01–06", () => {
     for (const event of events) {
-      expect(event.supportedToolIds).toEqual(["predict", "pace", "finish"]);
+      expect(event.supportedToolIds).toEqual([
+        "predict",
+        "pace",
+        "finish",
+        "target",
+        "splits",
+        "profile",
+      ]);
     }
   });
 

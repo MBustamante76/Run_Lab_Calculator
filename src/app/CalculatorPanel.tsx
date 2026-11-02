@@ -1,7 +1,9 @@
-import { workspaceCopy } from "../config/copy";
 import { Tool01Predict } from "../tools/Tool01Predict";
 import { Tool02RacePace } from "../tools/Tool02RacePace";
 import { Tool03FinishingTime } from "../tools/Tool03FinishingTime";
+import { Tool04TargetPb } from "../tools/Tool04TargetPb";
+import { Tool05RaceSplits } from "../tools/Tool05RaceSplits";
+import { Tool06PerformanceProfile } from "../tools/Tool06PerformanceProfile";
 import type { ToolDefinition } from "../tools/toolTypes";
 import { InfoPopover } from "./InfoPopover";
 
@@ -18,9 +20,9 @@ export function CalculatorPanel({ tool }: CalculatorPanelProps) {
       {tool.id === "predict" ? <Tool01Predict /> : null}
       {tool.id === "pace" ? <Tool02RacePace /> : null}
       {tool.id === "finish" ? <Tool03FinishingTime /> : null}
-      {tool.id === "predict" || tool.id === "pace" || tool.id === "finish" ? null : (
-        <p className="run-lab-calculator__pending">{workspaceCopy.notCalculated}</p>
-      )}
+      {tool.id === "target" ? <Tool04TargetPb /> : null}
+      {tool.id === "splits" ? <Tool05RaceSplits /> : null}
+      {tool.id === "profile" ? <Tool06PerformanceProfile /> : null}
     </section>
   );
 }

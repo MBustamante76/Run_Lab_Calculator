@@ -2,7 +2,7 @@ import type { ToolId } from "../tools/toolTypes";
 import type { RhythmMetres } from "./types";
 import { METRES_PER_MILE } from "./units";
 
-export type CalculationToolId = Extract<ToolId, "predict" | "pace" | "finish">;
+export type CalculationToolId = ToolId;
 
 export type EventGroup = "sprint" | "middle" | "long";
 
@@ -52,9 +52,9 @@ export function splitDistancesFor(metres: number): readonly RhythmMetres[] {
 }
 
 export function supportedToolsFor(): readonly CalculationToolId[] {
-  // All catalogue distances, including 100m/200m and 10K, are available on Tools 01–03
+  // All catalogue distances are available on Tools 01–06
   // (sprint average-pace caveats live in tool copy / result notes).
-  return ["predict", "pace", "finish"];
+  return ["predict", "pace", "finish", "target", "splits", "profile"];
 }
 
 

@@ -84,8 +84,8 @@ describe("Tool 03 finishing time", () => {
     await openFinish(user);
 
     await user.click(screen.getByRole("button", { name: "Calculate my result" }));
-    expect(screen.getByRole("alert")).toHaveTextContent("Enter the minutes.");
     expect(screen.getByRole("alert")).toHaveTextContent("Enter the seconds.");
+    expect(screen.getByRole("alert")).not.toHaveTextContent("Enter the minutes.");
 
     await enterPace(user, "0", "0");
     expect(screen.getByRole("alert")).toHaveTextContent("Enter a time greater than zero.");

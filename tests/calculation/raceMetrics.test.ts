@@ -55,9 +55,15 @@ describe("race metrics", () => {
 
   it("reports the checkpoint fixtures", () => {
     const lines = engineDiagnosticsLines();
-    expect(lines).toContain("mile | 1 Mile | 1609.344 m | middle | predict, pace, finish | splits 400 | route middle");
-    expect(lines).toContain("100 | 100m | 100 m | sprint | predict, pace, finish | splits 100 | route sprint");
-    expect(lines).toContain("10k | 10K | 10000 m | long | predict, pace, finish | splits 400 | route long");
+    expect(lines).toContain(
+      "mile | 1 Mile | 1609.344 m | middle | predict, pace, finish, target, splits, profile | splits 400 | route middle",
+    );
+    expect(lines).toContain(
+      "100 | 100m | 100 m | sprint | predict, pace, finish, target, splits, profile | splits 100 | route sprint",
+    );
+    expect(lines).toContain(
+      "10k | 10K | 10000 m | long | predict, pace, finish, target, splits, profile | splits 400 | route long",
+    );
 
     expect(lines).toContain("Total time: 1200 s");
     expect(lines).toContain("Pace per km: 4:00");

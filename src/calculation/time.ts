@@ -98,7 +98,8 @@ export function readStructuredNumber(value: string): unknown {
 
 export function parseStructuredTime(input: StructuredTimeInput): ValidationResult<ParsedTime> {
   const hours = parseField(input.hours, "hours", "hours", false, true);
-  const minutes = parseField(input.minutes, "minutes", "minutes", true, true);
+  // Minutes are optional like hours so sprint times can be entered as seconds only (e.g. 11.2).
+  const minutes = parseField(input.minutes, "minutes", "minutes", false, true);
   const seconds = parseField(input.seconds, "seconds", "seconds", true, false);
   const fractionalSeconds = parseField(
     input.fractionalSeconds,
@@ -150,12 +151,12 @@ export function parseStructuredTime(input: StructuredTimeInput): ValidationResul
     );
   }
 
-  if (errors.length > 0 || secondsMilliseconds === undefined || minutes.value === undefined) {
+  if (errors.length > 0 || secondsMilliseconds === undefined) {
     return invalidResult(errors);
   }
 
   const milliseconds =
-    (hours.value ?? 0) * 3_600_000 + minutes.value * 60_000 + secondsMilliseconds;
+    (hours.value ?? 0) * 3_600_000 + (minutes.value ?? 0) * 60_000 + secondsMilliseconds;
 
   if (milliseconds <= 0) {
     return invalidResult([

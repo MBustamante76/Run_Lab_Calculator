@@ -46,8 +46,13 @@ describe("structured time", () => {
       expect(sixty.errors.some((error) => error.message === "Seconds must be less than 60.")).toBe(true);
     }
     if (!blank.ok) {
-      expect(blank.errors.map((error) => error.fieldId)).toEqual(["minutes", "seconds"]);
+      expect(blank.errors.map((error) => error.fieldId)).toEqual(["seconds"]);
     }
+  });
+
+  it("treats blank minutes as zero so sprint times can be seconds-only", () => {
+    const result = parseStructuredTime({ minutes: "", seconds: 11.2 });
+    expect(result.ok && result.value.milliseconds).toBe(11_200);
   });
 
   it("rejects display strings and ambiguous fractions", () => {

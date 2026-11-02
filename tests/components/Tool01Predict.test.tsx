@@ -216,7 +216,7 @@ describe("Tool 01 prediction", () => {
     await user().clear(timeFields("Second PB time").seconds);
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
 
-    expect(screen.getByRole("alert")).toHaveTextContent("Enter the minutes.");
+    expect(screen.getByRole("alert")).toHaveTextContent("Enter the seconds.");
     expect(timeFields("PB time").minutes).toHaveValue("4");
     expect(timeFields("PB time").seconds).toHaveValue("30");
     expect(screen.queryByText("Estimated equivalent performance")).not.toBeInTheDocument();

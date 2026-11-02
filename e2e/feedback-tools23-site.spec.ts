@@ -20,11 +20,11 @@ test.describe("Michael feedback — Tools 02/03 + site-wide", () => {
     expect(overflow).toBe(false);
   });
 
-  test("UX-04 / SCOPE-01 / SCOPE-02 remain deferred", async ({ page }) => {
+  test("SCOPE-01 / SCOPE-02 — calculator does not take over site navigation", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("radio", { name: /06\s*discover my performance profile/i })).toHaveAttribute(
       "aria-disabled",
-      "true",
+      "false",
     );
     await expect(page.getByRole("navigation")).toHaveCount(0);
   });

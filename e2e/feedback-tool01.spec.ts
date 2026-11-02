@@ -127,12 +127,12 @@ test.describe("Michael feedback — Tool 01 Testing Log + UX", () => {
     await expect(page.getByLabel("Second PB distance").locator('option[value="1500"]')).toHaveCount(0);
   });
 
-  test("Test 10 — blank time requires minutes and seconds", async ({ page }) => {
+  test("Test 10 — blank time requires seconds (minutes may be empty for sprints)", async ({ page }) => {
     await timeField(page, "Minutes", "PB time").fill("");
     await timeField(page, "Seconds", "PB time").fill("");
     await calculate(page);
-    await expect(page.getByRole("alert")).toContainText("Enter the minutes.");
     await expect(page.getByRole("alert")).toContainText("Enter the seconds.");
+    await expect(page.getByRole("alert")).not.toContainText("Enter the minutes.");
   });
 
 

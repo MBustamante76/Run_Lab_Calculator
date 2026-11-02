@@ -33,21 +33,24 @@ const catalogue = [
     number: "04",
     title: "Plan my target PB",
     description: "See the pace and splits needed to reach your next goal.",
-    purpose: "This tool is planned for a later milestone.",
+    purpose:
+      "Maya wants to run 1500m in 5:00. What pace does that take, and what should each 400m feel like?\n\nEnter a target distance and goal time to see the required pace, speed and even splits.\n\nIt's like turning a dream PB into a practical race plan.\n\nThese are even-pace averages. Race day may vary.",
   },
   {
     id: "splits",
     number: "05",
     title: "Build my race splits",
     description: "Create clear checkpoint times for your chosen race.",
-    purpose: "This tool is planned for a later milestone.",
+    purpose:
+      "Alex is racing 5000m and wants to know what the clock should say at each kilometre for a 20:00 finish.\n\nEnter the race distance and goal time to build an even-pace checkpoint list.\n\nIt's like a simple race roadmap from start to finish.\n\nReal races often vary slightly from lap to lap.",
   },
   {
     id: "profile",
     number: "06",
     title: "Discover my performance profile",
     description: "See where your running strengths currently lie.",
-    purpose: "This tool is planned for a later milestone.",
+    purpose:
+      "Chris has a 800m PB of 2:10 and a 5000m PB of 18:30. Which is the stronger performance?\n\nEnter one to four PBs and choose men or women scoring tables. World Athletics outdoor points put different distances on one comparable scale.\n\nIt's a guide to relative strengths, not a ranking of your potential.\n\nPoints follow the published outdoor tables for the selected sex.",
   },
 ] as const satisfies readonly Omit<ToolDefinition, "enabled">[];
 

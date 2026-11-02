@@ -11,8 +11,7 @@ function choice(name: RegExp) {
 }
 
 describe("calculator shell", () => {
-  it("lists the six final tools and keeps later tools unavailable", async () => {
-    const user = userEvent.setup();
+  it("lists all six tools as available and keeps the WordPress host chrome out", async () => {
     render(<RunLabCalculatorApp />);
 
     expect(screen.getByRole("heading", { name: "I want to…" })).toBeInTheDocument();
@@ -22,23 +21,11 @@ describe("calculator shell", () => {
     expect(predict).toHaveAttribute("aria-checked", "true");
     expect(choice(/02\s*calculate my race pace/i)).toHaveAttribute("aria-disabled", "false");
     expect(choice(/03\s*calculate my finishing time/i)).toHaveAttribute("aria-disabled", "false");
-
-    for (const label of [
-      /04\s*plan my target pb/i,
-      /05\s*build my race splits/i,
-      /06\s*discover my performance profile/i,
-    ]) {
-      const futureTool = choice(label);
-      expect(futureTool).toHaveAttribute("aria-disabled", "true");
-      expect(futureTool).toHaveTextContent("Coming in the next milestone");
-      await user.click(futureTool);
-    }
-
-    expect(predict).toHaveAttribute("aria-checked", "true");
-    expect(screen.getByRole("heading", { level: 3, name: "Predict my times at other distances" })).toBeInTheDocument();
-    expect(screen.getByLabelText("PB distance")).toBeInTheDocument();
+    expect(choice(/04\s*plan my target pb/i)).toHaveAttribute("aria-disabled", "false");
+    expect(choice(/05\s*build my race splits/i)).toHaveAttribute("aria-disabled", "false");
+    expect(choice(/06\s*discover my performance profile/i)).toHaveAttribute("aria-disabled", "false");
+    expect(screen.queryByText("Coming in the next milestone")).not.toBeInTheDocument();
     expect(screen.queryByText("This calculator is coming in the next milestone.")).not.toBeInTheDocument();
-    expect(screen.queryByText(/NaN|10:59|estimated equivalent/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /book a consultation/i })).not.toBeInTheDocument();
     expect(screen.getByText(calculatorDisclaimer)).toBeInTheDocument();
@@ -55,9 +42,12 @@ describe("calculator shell", () => {
     await user.click(choice(/03\s*calculate my finishing time/i));
     expect(screen.getByRole("heading", { level: 3, name: "Calculate my finishing time" })).toBeInTheDocument();
 
-    choice(/03\s*calculate my finishing time/i).focus();
+    await user.click(choice(/04\s*plan my target pb/i));
+    expect(screen.getByRole("heading", { level: 3, name: "Plan my target PB" })).toBeInTheDocument();
+
+    choice(/04\s*plan my target pb/i).focus();
     await user.keyboard("{ArrowUp}");
-    expect(choice(/02\s*calculate my race pace/i)).toHaveAttribute("aria-checked", "true");
+    expect(choice(/03\s*calculate my finishing time/i)).toHaveAttribute("aria-checked", "true");
   });
 
   it("opens and closes the purpose text from the keyboard", async () => {

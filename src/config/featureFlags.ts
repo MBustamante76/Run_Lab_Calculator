@@ -1,3 +1,3 @@
 export const featureFlags = {
-  tools04to06: false,
+  tools04to06: true,
 } as const;

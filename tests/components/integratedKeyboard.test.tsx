@@ -15,12 +15,12 @@ describe("integrated calculator keyboard", () => {
     expect(pace).toHaveAttribute("aria-checked", "true");
     expect(pace).toHaveFocus();
 
-    const future = screen.getByRole("radio", { name: /04\s*plan my target pb/i });
-    expect(future).toHaveAttribute("aria-disabled", "true");
-    expect(future).toHaveTextContent("Coming in the next milestone");
-    future.focus();
+    const target = screen.getByRole("radio", { name: /04\s*plan my target pb/i });
+    expect(target).toHaveAttribute("aria-disabled", "false");
+    target.focus();
     await user.keyboard("{Enter}");
-    expect(pace).toHaveAttribute("aria-checked", "true");
+    expect(target).toHaveAttribute("aria-checked", "true");
+    await user.click(pace);
 
     const purpose = screen.getByRole("button", { name: "What is it for?" });
     purpose.focus();
