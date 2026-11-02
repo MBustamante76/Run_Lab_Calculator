@@ -1,5 +1,5 @@
 === RUN-LAB Performance Calculator ===
-Stable tag: 0.1.4
+Stable tag: 0.1.5
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
@@ -19,6 +19,10 @@ The global site header, navigation and footer stay with the WordPress theme.
 2. Place [run_lab_calculator] on the page where the calculator should appear.
 
 == Changelog ==
+
+= 0.1.5 =
+* Tools 04–07: target PB, race splits with even/2% negative and spacing options, WA performance profile, and WMA/USATF 2025 age-grade.
+* Time entry: blank minutes allowed for sprint times; validation summary scrolls into view.
 
 = 0.1.4 =
 * Enable Tools 04–06: target PB pacing, even-pace race checkpoints, and World Athletics outdoor performance profile.

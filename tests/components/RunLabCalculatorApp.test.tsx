@@ -11,11 +11,11 @@ function choice(name: RegExp) {
 }
 
 describe("calculator shell", () => {
-  it("lists all six tools as available and keeps the WordPress host chrome out", async () => {
+  it("lists all seven tools as available and keeps the WordPress host chrome out", async () => {
     render(<RunLabCalculatorApp />);
 
     expect(screen.getByRole("heading", { name: "I want to…" })).toBeInTheDocument();
-    expect(tools).toHaveLength(6);
+    expect(tools).toHaveLength(7);
 
     const predict = choice(/01\s*predict my times at other distances/i);
     expect(predict).toHaveAttribute("aria-checked", "true");
@@ -24,6 +24,7 @@ describe("calculator shell", () => {
     expect(choice(/04\s*plan my target pb/i)).toHaveAttribute("aria-disabled", "false");
     expect(choice(/05\s*build my race splits/i)).toHaveAttribute("aria-disabled", "false");
     expect(choice(/06\s*discover my performance profile/i)).toHaveAttribute("aria-disabled", "false");
+    expect(choice(/07\s*age-grade my performance/i)).toHaveAttribute("aria-disabled", "false");
     expect(screen.queryByText("Coming in the next milestone")).not.toBeInTheDocument();
     expect(screen.queryByText("This calculator is coming in the next milestone.")).not.toBeInTheDocument();
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();

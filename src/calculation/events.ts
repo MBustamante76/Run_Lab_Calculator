@@ -2,7 +2,7 @@ import type { ToolId } from "../tools/toolTypes";
 import type { RhythmMetres } from "./types";
 import { METRES_PER_MILE } from "./units";
 
-export type CalculationToolId = ToolId;
+export type CalculationToolId = Exclude<ToolId, "ageGrade">;
 
 export type EventGroup = "sprint" | "middle" | "long";
 
@@ -52,8 +52,8 @@ export function splitDistancesFor(metres: number): readonly RhythmMetres[] {
 }
 
 export function supportedToolsFor(): readonly CalculationToolId[] {
-  // All catalogue distances are available on Tools 01–06
-  // (sprint average-pace caveats live in tool copy / result notes).
+  // Catalogue distances for Tools 01–06 (age-grade has its own road list).
+  // Sprint average-pace caveats live in tool copy / result notes.
   return ["predict", "pace", "finish", "target", "splits", "profile"];
 }
 

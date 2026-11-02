@@ -5,6 +5,7 @@ export const toolIds = [
   "target",
   "splits",
   "profile",
+  "ageGrade",
 ] as const;
 
 export type ToolId = (typeof toolIds)[number];

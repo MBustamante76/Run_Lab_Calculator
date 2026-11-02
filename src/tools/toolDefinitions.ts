@@ -42,7 +42,7 @@ const catalogue = [
     title: "Build my race splits",
     description: "Create clear checkpoint times for your chosen race.",
     purpose:
-      "Alex is racing 5000m and wants to know what the clock should say at each kilometre for a 20:00 finish.\n\nEnter the race distance and goal time to build an even-pace checkpoint list.\n\nIt's like a simple race roadmap from start to finish.\n\nReal races often vary slightly from lap to lap.",
+      "Alex is racing 5000m and wants to know what the clock should say at each kilometre for a 20:00 finish.\n\nEnter the race distance and goal time, choose even pace or a 2% negative split, and pick how often to mark the race.\n\nIt's like a simple race roadmap from start to finish.\n\nReal races often vary slightly from lap to lap.",
   },
   {
     id: "profile",
@@ -51,6 +51,14 @@ const catalogue = [
     description: "See where your running strengths currently lie.",
     purpose:
       "Chris has a 800m PB of 2:10 and a 5000m PB of 18:30. Which is the stronger performance?\n\nEnter one to four PBs and choose men or women scoring tables. World Athletics outdoor points put different distances on one comparable scale.\n\nIt's a guide to relative strengths, not a ranking of your potential.\n\nPoints follow the published outdoor tables for the selected sex.",
+  },
+  {
+    id: "ageGrade",
+    number: "07",
+    title: "Age-grade my performance",
+    description: "See how good a race is when age and sex are taken into account.",
+    purpose:
+      "Pat is 45 and has just run 5K in 22:00. How does that compare once age is factored in?\n\nEnter sex, age, distance and time to get an age-grade percentage and an open-equivalent time.\n\nIt's a fair way to compare performances across age groups.\n\nScores use the 2025 USATF MLDR / WMA road standards.",
   },
 ] as const satisfies readonly Omit<ToolDefinition, "enabled">[];
 

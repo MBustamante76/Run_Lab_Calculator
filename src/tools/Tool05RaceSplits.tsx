@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { ErrorSummary } from "../app/ErrorSummary";
 import { SplitsResultPanel } from "../app/SplitsResultPanel";
-import { buildEvenCheckpointPlan, type CheckpointPlan } from "../calculation/checkpoints";
+import {
+  buildCheckpointPlan,
+  type CheckpointPlan,
+  type PacingStrategy,
+  type SplitSpacing,
+} from "../calculation/checkpoints";
 import { eventById, events } from "../calculation/events";
 import { parseStructuredTime, readStructuredNumber } from "../calculation/time";
 import type { ValidationError } from "../calculation/types";
@@ -13,15 +18,19 @@ const splitsEvents = events.filter((event) => event.supportedToolIds.includes("s
 
 type SplitsForm = {
   eventId: string;
+  pacingStrategy: PacingStrategy;
+  splitSpacing: SplitSpacing;
   hours: string;
   minutes: string;
   seconds: string;
 };
 
-function formForEvent(eventId: string): SplitsForm {
+function formForEvent(eventId: string, extras?: Partial<SplitsForm>): SplitsForm {
   const time = defaultTimeForEvent(eventId);
   return {
     eventId,
+    pacingStrategy: extras?.pacingStrategy ?? "even",
+    splitSpacing: extras?.splitSpacing ?? "auto",
     hours: time.hours,
     minutes: time.minutes,
     seconds: time.seconds,
@@ -35,6 +44,7 @@ function messageFor(errors: readonly ValidationError[], fieldId: string): string
 }
 
 export function Tool05RaceSplits() {
+  const strategyGroup = useId();
   const [form, setForm] = useState<SplitsForm>(() => formForEvent(initialEventId));
   const [errors, setErrors] = useState<readonly ValidationError[]>([]);
   const [plan, setPlan] = useState<CheckpointPlan | null>(null);
@@ -52,7 +62,10 @@ export function Tool05RaceSplits() {
       return;
     }
 
-    const result = buildEvenCheckpointPlan(eventById(form.eventId).metres, parsed.value.milliseconds);
+    const result = buildCheckpointPlan(eventById(form.eventId).metres, parsed.value.milliseconds, {
+      pacingStrategy: form.pacingStrategy,
+      splitSpacing: form.splitSpacing,
+    });
     if (!result.ok) {
       setErrors(result.errors);
       setPlan(null);
@@ -79,7 +92,8 @@ export function Tool05RaceSplits() {
     >
       <ErrorSummary errors={errors} />
       <p className="run-lab-calculator__form-lead">
-        Enter your race distance and goal finishing time to build even-pace checkpoint times.
+        Enter your race distance and goal finishing time to build checkpoint times. Choose even pace
+        or a 2% negative split, and how often to mark the race.
       </p>
       <DistanceSelect
         id="splits-distance"
@@ -88,10 +102,57 @@ export function Tool05RaceSplits() {
         value={form.eventId}
         error={messageFor(errors, "distance")}
         onChange={(eventId) => {
-          setForm(formForEvent(eventId));
+          setForm(formForEvent(eventId, form));
           setPlan(null);
         }}
       />
+      <fieldset className="run-lab-calculator__units">
+        <legend>Pacing strategy</legend>
+        <label className="run-lab-calculator__unit">
+          <input
+            type="radio"
+            name={strategyGroup}
+            checked={form.pacingStrategy === "even"}
+            onChange={() => {
+              setForm((current) => ({ ...current, pacingStrategy: "even" }));
+              setPlan(null);
+            }}
+          />
+          Even splits
+        </label>
+        <label className="run-lab-calculator__unit">
+          <input
+            type="radio"
+            name={strategyGroup}
+            checked={form.pacingStrategy === "negative"}
+            onChange={() => {
+              setForm((current) => ({ ...current, pacingStrategy: "negative" }));
+              setPlan(null);
+            }}
+          />
+          Negative split (2%)
+        </label>
+      </fieldset>
+      <div className="run-lab-calculator__field">
+        <label htmlFor="splits-spacing">Checkpoint every</label>
+        <select
+          id="splits-spacing"
+          value={form.splitSpacing}
+          onChange={(event) => {
+            setForm((current) => ({
+              ...current,
+              splitSpacing: event.target.value as SplitSpacing,
+            }));
+            setPlan(null);
+          }}
+        >
+          <option value="auto">Auto</option>
+          <option value="100">100 m</option>
+          <option value="400">400 m</option>
+          <option value="1000">1 km</option>
+          <option value="mile">1 mile</option>
+        </select>
+      </div>
       <fieldset className="run-lab-calculator__time">
         <legend>Goal finishing time</legend>
         <StructuredTimeInput

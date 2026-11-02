@@ -4,6 +4,7 @@ import { Tool03FinishingTime } from "../tools/Tool03FinishingTime";
 import { Tool04TargetPb } from "../tools/Tool04TargetPb";
 import { Tool05RaceSplits } from "../tools/Tool05RaceSplits";
 import { Tool06PerformanceProfile } from "../tools/Tool06PerformanceProfile";
+import { Tool07AgeGrade } from "../tools/Tool07AgeGrade";
 import type { ToolDefinition } from "../tools/toolTypes";
 import { InfoPopover } from "./InfoPopover";
 
@@ -23,6 +24,7 @@ export function CalculatorPanel({ tool }: CalculatorPanelProps) {
       {tool.id === "target" ? <Tool04TargetPb /> : null}
       {tool.id === "splits" ? <Tool05RaceSplits /> : null}
       {tool.id === "profile" ? <Tool06PerformanceProfile /> : null}
+      {tool.id === "ageGrade" ? <Tool07AgeGrade /> : null}
     </section>
   );
 }
