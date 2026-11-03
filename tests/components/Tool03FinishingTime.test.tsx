@@ -148,12 +148,12 @@ describe("Tool 03 finishing time", () => {
     expect(screen.queryByText("Finishing time")).not.toBeInTheDocument();
   });
 
-  it("offers 100m, 200m and 10K as finishing distances", async () => {
+  it("offers 10K and keeps 100m/200m off Tools 01–05", async () => {
     const user = userEvent.setup();
     render(<RunLabCalculatorApp />);
     await openFinish(user);
-    expect(screen.getByRole("option", { name: "100m" })).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: "200m" })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "100m" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "200m" })).not.toBeInTheDocument();
     expect(screen.getByRole("option", { name: "10K" })).toBeInTheDocument();
   });
 

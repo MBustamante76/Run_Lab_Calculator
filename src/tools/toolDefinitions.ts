@@ -48,9 +48,9 @@ const catalogue = [
     id: "profile",
     number: "06",
     title: "Discover my performance profile",
-    description: "See where your running strengths currently lie.",
+    description: "Compare your performances and discover where your running strengths currently lie.",
     purpose:
-      "Chris has a 800m PB of 2:10 and a 5000m PB of 18:30. Which is the stronger performance?\n\nEnter one to four PBs and choose men or women scoring tables. World Athletics outdoor points put different distances on one comparable scale.\n\nIt's a guide to relative strengths, not a ranking of your potential.\n\nPoints follow the published outdoor tables for the selected sex.",
+      "How does it work?\n\nEnter between 2 and 6 PBs from any of the available distances. RUN-LAB converts each performance to its corresponding World Athletics performance score and compares the results.\n\nA higher relative score represents a stronger performance. RUN-LAB then looks at where your strongest results sit across the speed-to-endurance range to create your performance profile.\n\nYou do not need to have raced every distance. Just enter the PBs you know.\n\nThis is a performance comparison rather than a physiological assessment. Training history, race conditions, surface and how recently each PB was achieved can all influence the picture.",
   },
   {
     id: "ageGrade",

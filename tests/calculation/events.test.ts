@@ -28,8 +28,10 @@ describe("event configuration", () => {
     expect(countLiteral("src/calculation", "export const events")).toBe(1);
   });
 
-  it("opens all catalogue distances to tools 01–06", () => {
-    for (const event of events) {
+  it("keeps 100m and 200m on Tool 06 only; other distances serve tools 01–06", () => {
+    expect(eventById("100").supportedToolIds).toEqual(["profile"]);
+    expect(eventById("200").supportedToolIds).toEqual(["profile"]);
+    for (const event of events.filter((candidate) => candidate.id !== "100" && candidate.id !== "200")) {
       expect(event.supportedToolIds).toEqual([
         "predict",
         "pace",

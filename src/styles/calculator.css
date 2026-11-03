@@ -410,6 +410,7 @@
 .run-lab-calculator__actions {
   display: grid;
   gap: 10px;
+  margin-top: 20px;
 }
 
 .run-lab-calculator__go,
@@ -642,6 +643,144 @@
   font-size: 12px;
   line-height: 1.5;
   border-top: 1px solid #333333;
+}
+
+.run-lab-calculator__result--profile {
+  grid-template-columns: 1fr;
+}
+
+.run-lab-calculator__profile-detail {
+  margin: -4px 0 8px;
+  color: #cfcfcf;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.run-lab-calculator__profile-block {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #333333;
+}
+
+.run-lab-calculator__profile-heading {
+  margin: 0 0 10px;
+  color: #a7a7a7;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.run-lab-calculator__profile-interpretation {
+  margin: 0;
+  color: #d8d8d8;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.run-lab-calculator__profile-gauge {
+  text-align: center;
+}
+
+.run-lab-calculator__profile-gauge-svg {
+  display: block;
+  width: min(100%, 280px);
+  margin: 0 auto;
+}
+
+.run-lab-calculator__profile-gauge-arc {
+  fill: none;
+  stroke-width: 16;
+  stroke-linecap: butt;
+}
+
+.run-lab-calculator__profile-gauge-arc--speed {
+  stroke: #5ec8c0;
+}
+
+.run-lab-calculator__profile-gauge-arc--middle {
+  stroke: #8b6bc7;
+}
+
+.run-lab-calculator__profile-gauge-arc--endurance {
+  stroke: #6faf7a;
+}
+
+.run-lab-calculator__profile-gauge-needle {
+  fill: var(--color-white);
+}
+
+.run-lab-calculator__profile-gauge-hub {
+  fill: var(--color-accent);
+}
+
+.run-lab-calculator__profile-gauge-caption {
+  fill: #9a9a9a;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.run-lab-calculator__profile-gauge-label {
+  margin: 4px 0 0;
+  color: var(--color-white);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.run-lab-calculator__profile-chart-plot {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
+  gap: 10px;
+  align-items: end;
+  min-height: 160px;
+}
+
+.run-lab-calculator__profile-chart-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.run-lab-calculator__profile-chart-track {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  height: 120px;
+  padding: 0 8px;
+}
+
+.run-lab-calculator__profile-chart-bar {
+  width: 100%;
+  min-height: 4px;
+  background: #5ec8c0;
+  border-radius: 6px 6px 2px 2px;
+}
+
+.run-lab-calculator__profile-chart-bar--leading {
+  background: #8b6bc7;
+}
+
+.run-lab-calculator__profile-chart-value {
+  color: var(--color-white);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.run-lab-calculator__profile-chart-event,
+.run-lab-calculator__profile-chart-time,
+.run-lab-calculator__profile-chart-axis {
+  color: #9a9a9a;
+  font-size: 11px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.run-lab-calculator__profile-chart-axis {
+  margin: 10px 0 0;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .run-lab-calculator button:focus-visible {

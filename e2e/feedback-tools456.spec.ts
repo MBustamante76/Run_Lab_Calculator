@@ -24,11 +24,15 @@ test.describe("Tools 04 / 05 / 06 / 07", () => {
 
   test("Tool 06 — two default PBs produce a ranked WA profile", async ({ page }) => {
     await openTool(page, /06\s*discover my performance profile/i);
-    await expect(page.getByRole("radio", { name: "Men", exact: true })).toBeChecked();
+    await expect(page.getByRole("radio", { name: "Male", exact: true })).toBeChecked();
     await calculate(page);
-    await expect(page.getByText(/Strongest ·/i)).toBeVisible();
+    await expect(page.getByLabelText("PB 1 distance")).toHaveCount(0);
+    await expect(page.getByText(/Strongest performance|Leading performances/i)).toBeVisible();
     await expect(page.getByText(/\d+ pts/).first()).toBeVisible();
-    await expect(page.getByText(/Points use the World Athletics outdoor scoring tables/i)).toBeVisible();
+    await expect(page.getByRole("img", { name: /Relative profile gauge/i })).toBeVisible();
+    await expect(page.getByRole("img", { name: /World Athletics score chart/i })).toBeVisible();
+    await expect(page.getByText(/Performance comparison based on World Athletics Scoring Tables/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: "Edit performances" })).toBeVisible();
   });
 
   test("Tool 05 — negative split keeps finish time and notes 2%", async ({ page }) => {

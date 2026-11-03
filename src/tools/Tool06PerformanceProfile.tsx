@@ -4,6 +4,8 @@ import { ProfileResultPanel } from "../app/ProfileResultPanel";
 import { events } from "../calculation/events";
 import {
   buildPerformanceProfile,
+  MAX_PROFILE_PERFORMANCES,
+  MIN_PROFILE_PERFORMANCES,
   type PerformanceProfile,
   type ProfileSex,
 } from "../calculation/profile/worldAthleticsPoints";
@@ -118,8 +120,12 @@ export function Tool06PerformanceProfile() {
     setProfile(null);
   }
 
+  function editPerformances() {
+    setProfile(null);
+  }
+
   function addPb() {
-    if (form.performances.length >= 4) {
+    if (form.performances.length >= MAX_PROFILE_PERFORMANCES) {
       return;
     }
     const used = new Set(form.performances.map((row) => row.eventId));
@@ -135,7 +141,7 @@ export function Tool06PerformanceProfile() {
   }
 
   function removePb(index: number) {
-    if (form.performances.length <= 1) {
+    if (form.performances.length <= MIN_PROFILE_PERFORMANCES) {
       return;
     }
     setForm((current) => ({
@@ -143,6 +149,22 @@ export function Tool06PerformanceProfile() {
       performances: current.performances.filter((_, rowIndex) => rowIndex !== index),
     }));
     setProfile(null);
+  }
+
+  if (profile) {
+    return (
+      <div className="run-lab-calculator__form">
+        <ProfileResultPanel profile={profile} />
+        <div className="run-lab-calculator__actions">
+          <button type="button" className="run-lab-calculator__go" onClick={editPerformances}>
+            Edit performances
+          </button>
+          <button type="button" className="run-lab-calculator__reset" onClick={reset}>
+            Reset
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -155,11 +177,12 @@ export function Tool06PerformanceProfile() {
     >
       <ErrorSummary errors={errors} />
       <p className="run-lab-calculator__form-lead">
-        Enter one to four PBs to see which performances score highest on the World Athletics outdoor
-        tables.
+        Enter {MIN_PROFILE_PERFORMANCES}–{MAX_PROFILE_PERFORMANCES} race performances to compare them
+        on the World Athletics scale and see whether your results currently lean towards speed,
+        middle-distance or endurance.
       </p>
       <fieldset className="run-lab-calculator__units">
-        <legend>Scoring tables</legend>
+        <legend>Sex</legend>
         <label className="run-lab-calculator__unit">
           <input
             type="radio"
@@ -170,7 +193,7 @@ export function Tool06PerformanceProfile() {
               setProfile(null);
             }}
           />
-          Men
+          Male
         </label>
         <label className="run-lab-calculator__unit">
           <input
@@ -182,7 +205,7 @@ export function Tool06PerformanceProfile() {
               setProfile(null);
             }}
           />
-          Women
+          Female
         </label>
       </fieldset>
       {form.performances.map((row, index) => {
@@ -201,19 +224,17 @@ export function Tool06PerformanceProfile() {
             }
           >
             <div className="run-lab-calculator__pb">
-              {form.performances.length > 1 ? (
-                <p className="run-lab-calculator__pb-label">PB {index + 1}</p>
-              ) : null}
+              <p className="run-lab-calculator__pb-label">PB {index + 1}</p>
               <DistanceSelect
                 id={`profile-distance-${index}`}
-                label={form.performances.length > 1 ? `PB ${index + 1} distance` : "PB distance"}
+                label={`PB ${index + 1} distance`}
                 events={available}
                 value={row.eventId}
                 error={messageFor(errors, `${prefix}Event`)}
                 onChange={(eventId) => updatePb(index, { ...pbForEvent(eventId) })}
               />
               <fieldset className="run-lab-calculator__time">
-                <legend>{form.performances.length > 1 ? `PB ${index + 1} time` : "PB time"}</legend>
+                <legend>{`PB ${index + 1} time`}</legend>
                 <StructuredTimeInput
                   idPrefix={`profile-${index}`}
                   showHours
@@ -235,7 +256,7 @@ export function Tool06PerformanceProfile() {
                   }
                 />
               </fieldset>
-              {form.performances.length > 1 ? (
+              {form.performances.length > MIN_PROFILE_PERFORMANCES ? (
                 <button
                   type="button"
                   className="run-lab-calculator__reset"
@@ -248,9 +269,9 @@ export function Tool06PerformanceProfile() {
           </div>
         );
       })}
-      {form.performances.length < 4 ? (
+      {form.performances.length < MAX_PROFILE_PERFORMANCES ? (
         <button type="button" className="run-lab-calculator__reset run-lab-calculator__add" onClick={addPb}>
-          + Add another PB
+          + Add another performance
         </button>
       ) : null}
       <div className="run-lab-calculator__actions">
@@ -261,7 +282,6 @@ export function Tool06PerformanceProfile() {
           Reset
         </button>
       </div>
-      {profile ? <ProfileResultPanel profile={profile} /> : null}
     </form>
   );
 }

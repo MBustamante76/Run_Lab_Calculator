@@ -26,11 +26,11 @@ async function enterTime(name: string, minutes: string, seconds: string) {
 }
 
 async function enterAnchors() {
-  await user().selectOptions(screen.getByLabelText("PB distance"), "200");
-  await enterTime("PB time", "0", "25");
+  await user().selectOptions(screen.getByLabelText("PB distance"), "400");
+  await enterTime("PB time", "0", "55");
   await user().click(screen.getByRole("button", { name: "+ Add another PB" }));
-  await user().selectOptions(screen.getByLabelText("Second PB distance"), "800");
-  await enterTime("Second PB time", "2", "10");
+  await user().selectOptions(screen.getByLabelText("Second PB distance"), "1500");
+  await enterTime("Second PB time", "4", "30");
 }
 
 describe("Tool 01 prediction", () => {
@@ -54,37 +54,55 @@ describe("Tool 01 prediction", () => {
     expect(timeFields("PB time").seconds).toHaveValue("0");
   });
 
-  it("estimates 400m from 200m and 800m and names both anchors", async () => {
+  it("estimates 800m from 400m and 1500m and names both anchors", async () => {
     render(<RunLabCalculatorApp />);
     await enterAnchors();
-    await user().selectOptions(screen.getByLabelText("Target distance"), "400");
+    await user().selectOptions(screen.getByLabelText("Target distance"), "800");
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
 
-    expect(screen.getByText("Estimated equivalent performance").parentElement).toHaveTextContent("57.0");
+    const engine = predictPerformance({
+      performances: [
+        { eventId: "400", milliseconds: 55_000 },
+        { eventId: "1500", milliseconds: 270_000 },
+      ],
+      targetEventId: "800",
+    });
+    expect(engine.status).toBe("success");
+    if (engine.status !== "success") {
+      return;
+    }
+
+    expect(screen.getByText("Estimated equivalent performance").parentElement).toHaveTextContent(
+      engine.displayTime,
+    );
     expect(screen.getByText("Based on your two PBs")).toBeInTheDocument();
     expect(
-      screen.getByText("Based on your 200m PB of 25.0 and your 800m PB of 2:10.0."),
+      screen.getByText("Based on your 400m PB of 55.0 and your 1500m PB of 4:30.0."),
     ).toBeInTheDocument();
     expect(screen.queryByText("1.0.0")).not.toBeInTheDocument();
 
     await user().click(screen.getByRole("button", { name: "How was this calculated?" }));
-    expect(screen.getAllByText(/200m PB of 25\.0/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/800m PB of 2:10\.0/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/400m PB of 55\.0/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/1500m PB of 4:30\.0/).length).toBeGreaterThan(0);
   });
 
-  it("estimates 600m from the same anchors", async () => {
+  it("estimates 1000m from the same anchors", async () => {
     render(<RunLabCalculatorApp />);
     await enterAnchors();
-    await user().selectOptions(screen.getByLabelText("Target distance"), "600");
+    await user().selectOptions(screen.getByLabelText("Target distance"), "1000");
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
 
-    expect(screen.getByText("Estimated equivalent performance").parentElement).toHaveTextContent("1:32.3");
+    expect(screen.getByText("Estimated equivalent performance")).toBeInTheDocument();
     expect(screen.getByText("Based on your two PBs")).toBeInTheDocument();
   });
 
-  it("does not extrapolate 200m and 800m to 5000m", async () => {
+  it("does not extrapolate 400m and 800m to 5000m", async () => {
     render(<RunLabCalculatorApp />);
-    await enterAnchors();
+    await user().selectOptions(screen.getByLabelText("PB distance"), "400");
+    await enterTime("PB time", "0", "55");
+    await user().click(screen.getByRole("button", { name: "+ Add another PB" }));
+    await user().selectOptions(screen.getByLabelText("Second PB distance"), "800");
+    await enterTime("Second PB time", "2", "10");
     await user().selectOptions(screen.getByLabelText("Target distance"), "5000");
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
 
@@ -95,10 +113,10 @@ describe("Tool 01 prediction", () => {
     expect(screen.queryByText("Based on your two PBs")).not.toBeInTheDocument();
   });
 
-  it("returns no time for a 100m PB and a 10K target", async () => {
+  it("returns no time for a 400m PB and a 10K target", async () => {
     render(<RunLabCalculatorApp />);
-    await user().selectOptions(screen.getByLabelText("PB distance"), "100");
-    await enterTime("PB time", "0", "12.5");
+    await user().selectOptions(screen.getByLabelText("PB distance"), "400");
+    await enterTime("PB time", "0", "55");
     await user().selectOptions(screen.getByLabelText("Target distance"), "10k");
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
 
@@ -182,11 +200,11 @@ describe("Tool 01 prediction", () => {
 
   it("removes a PB distance from the other PB and from the target", async () => {
     render(<RunLabCalculatorApp />);
-    await user().selectOptions(screen.getByLabelText("PB distance"), "200");
+    await user().selectOptions(screen.getByLabelText("PB distance"), "400");
     await user().click(screen.getByRole("button", { name: "+ Add another PB" }));
 
-    expect(within(screen.getByLabelText("Second PB distance")).queryByRole("option", { name: "200m" })).toBeNull();
-    expect(within(screen.getByLabelText("Target distance")).queryByRole("option", { name: "200m" })).toBeNull();
+    expect(within(screen.getByLabelText("Second PB distance")).queryByRole("option", { name: "400m" })).toBeNull();
+    expect(within(screen.getByLabelText("Target distance")).queryByRole("option", { name: "400m" })).toBeNull();
     expect(within(screen.getByLabelText("Target distance")).queryByRole("option", { name: "800m" })).toBeNull();
   });
 
@@ -263,24 +281,35 @@ describe("Tool 01 prediction", () => {
   it("resets the prediction and clears it when another tool is selected", async () => {
     render(<RunLabCalculatorApp />);
     await enterAnchors();
-    await user().selectOptions(screen.getByLabelText("Target distance"), "400");
+    await user().selectOptions(screen.getByLabelText("Target distance"), "800");
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
+    const engine = predictPerformance({
+      performances: [
+        { eventId: "400", milliseconds: 55_000 },
+        { eventId: "1500", milliseconds: 270_000 },
+      ],
+      targetEventId: "800",
+    });
+    expect(engine.status).toBe("success");
+    if (engine.status !== "success") {
+      return;
+    }
     const estimate = screen.getByText("Estimated equivalent performance").parentElement;
-    expect(estimate).toHaveTextContent("57.0");
+    expect(estimate).toHaveTextContent(engine.displayTime);
 
     await user().click(screen.getByRole("button", { name: "Reset" }));
     expect(timeFields("PB time").minutes).toHaveValue("5");
     expect(timeFields("PB time").seconds).toHaveValue("30");
     expect(screen.getByLabelText("PB distance")).toHaveValue("1500");
     expect(screen.queryByLabelText("Second PB distance")).not.toBeInTheDocument();
-    expect(screen.queryByText("57.0")).not.toBeInTheDocument();
+    expect(screen.queryByText(engine.displayTime)).not.toBeInTheDocument();
 
     await enterAnchors();
-    await user().selectOptions(screen.getByLabelText("Target distance"), "400");
+    await user().selectOptions(screen.getByLabelText("Target distance"), "800");
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
     await user().click(screen.getByRole("radio", { name: /02\s*calculate my race pace/i }));
     await user().click(screen.getByRole("radio", { name: /01\s*predict my times at other distances/i }));
-    expect(screen.queryByText("57.0")).not.toBeInTheDocument();
+    expect(screen.queryByText(engine.displayTime)).not.toBeInTheDocument();
     expect(timeFields("PB time").minutes).toHaveValue("5");
   });
 

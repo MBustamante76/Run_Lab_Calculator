@@ -24,7 +24,8 @@ export const draftMethodWarning = "This method is a draft awaiting RUN-LAB appro
 const performanceFields = ["first", "second"] as const;
 
 function findPredictionEvent(eventId: string) {
-  return events.find((event) => event.id === eventId && event.supportedToolIds.includes("predict"));
+  // Full catalogue lookup: UI tools filter via supportedToolIds (100/200 are Tool 06 only).
+  return events.find((event) => event.id === eventId);
 }
 
 function validate(request: PredictionRequest): ValidationError[] {
