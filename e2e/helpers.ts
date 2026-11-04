@@ -31,8 +31,11 @@ export async function calculate(page: Page) {
 
 export async function expectEstimate(page: Page, displayTime: string) {
   const estimate = page.locator(".run-lab-calculator__estimate");
-  await expect(estimate).toContainText("Estimated equivalent performance");
-  await expect(estimate.locator("b")).toHaveText(displayTime);
+  await expect(estimate).toContainText(/Estimated .+ performance/i);
+  await expect(estimate).toContainText("Central prediction");
+  await expect(estimate.locator(".run-lab-calculator__range-central-row strong")).toHaveText(displayTime);
+  await expect(estimate.locator("b")).toContainText("–");
+  await expect(estimate).toContainText(/Indicative performance range using ±/i);
 }
 
 export async function expectMetric(page: Page, label: string, value: string) {

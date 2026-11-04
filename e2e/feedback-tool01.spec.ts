@@ -147,8 +147,9 @@ test.describe("Michael feedback — Tool 01 Testing Log + UX", () => {
     await fillStructuredTime(page, { minutes: "2", seconds: "15.75" }, "PB time");
     await page.getByLabel("Target distance").selectOption("1500");
     await calculate(page);
-    await expect(page.getByText("Estimated equivalent performance")).toBeVisible();
-    await expect(page.locator(".run-lab-calculator__estimate b")).not.toHaveText("--:--");
+    await expect(page.getByText(/Estimated 1500m performance/i)).toBeVisible();
+    await expect(page.locator(".run-lab-calculator__estimate b")).toContainText("–");
+    await expect(page.locator(".run-lab-calculator__range-central-row strong")).not.toHaveText("--:--");
   });
 
   test("Test 13 — PB and target cannot both be 1500m", async ({ page }) => {

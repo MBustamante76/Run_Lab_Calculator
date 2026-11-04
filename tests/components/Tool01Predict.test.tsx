@@ -72,9 +72,10 @@ describe("Tool 01 prediction", () => {
       return;
     }
 
-    expect(screen.getByText("Estimated equivalent performance").parentElement).toHaveTextContent(
-      engine.displayTime,
-    );
+    expect(screen.getByText(/Estimated 800m performance/i)).toBeInTheDocument();
+    expect(screen.getByText("Central prediction").parentElement).toHaveTextContent(engine.displayTime);
+    expect(screen.getByText(engine.indicativeRange.footnote)).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /Indicative range/i })).toBeInTheDocument();
     expect(screen.getByText("Based on your two PBs")).toBeInTheDocument();
     expect(
       screen.getByText("Based on your 400m PB of 55.0 and your 1500m PB of 4:30.0."),
@@ -84,6 +85,7 @@ describe("Tool 01 prediction", () => {
     await user().click(screen.getByRole("button", { name: "How was this calculated?" }));
     expect(screen.getAllByText(/400m PB of 55\.0/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/1500m PB of 4:30\.0/).length).toBeGreaterThan(0);
+    expect(screen.getByText(/indicative performance range is ±1%/i)).toBeInTheDocument();
   });
 
   it("estimates 1000m from the same anchors", async () => {
@@ -92,7 +94,7 @@ describe("Tool 01 prediction", () => {
     await user().selectOptions(screen.getByLabelText("Target distance"), "1000");
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
 
-    expect(screen.getByText("Estimated equivalent performance")).toBeInTheDocument();
+    expect(screen.getByText(/Estimated 1000m performance/i)).toBeInTheDocument();
     expect(screen.getByText("Based on your two PBs")).toBeInTheDocument();
   });
 
@@ -109,7 +111,7 @@ describe("Tool 01 prediction", () => {
     expect(screen.getByRole("status")).toHaveTextContent(
       "We need a more relevant PB to estimate this distance reliably. Add a second PB closer to the target distance, or choose a nearer event.",
     );
-    expect(screen.queryByText("Estimated equivalent performance")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Estimated .+ performance/i)).not.toBeInTheDocument();
     expect(screen.queryByText("Based on your two PBs")).not.toBeInTheDocument();
   });
 
@@ -121,7 +123,7 @@ describe("Tool 01 prediction", () => {
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
 
     expect(screen.getByRole("status")).toHaveTextContent("more relevant PB");
-    expect(screen.queryByText("Estimated equivalent performance")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Estimated .+ performance/i)).not.toBeInTheDocument();
     expect(screen.queryByText((_, node) => node?.classList.contains("run-lab-calculator__estimate") ?? false)).not.toBeInTheDocument();
   });
 
@@ -132,7 +134,9 @@ describe("Tool 01 prediction", () => {
     await user().selectOptions(screen.getByLabelText("Target distance"), "10k");
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
 
-    expect(screen.getByText("Estimated equivalent performance").parentElement).toHaveTextContent("37:32");
+    expect(screen.getByText(/Estimated 10K performance/i)).toBeInTheDocument();
+    expect(screen.getByText("Central prediction").parentElement).toHaveTextContent("37:32");
+    expect(screen.getByText(/Indicative performance range using ±1\.5%/i)).toBeInTheDocument();
     expect(screen.getByText("Middle and long-distance scaling")).toBeInTheDocument();
   });
 
@@ -149,10 +153,10 @@ describe("Tool 01 prediction", () => {
     });
     expect(engine.status).toBe("success");
     if (engine.status === "success") {
-      expect(screen.getByText("Estimated equivalent performance").parentElement).toHaveTextContent(
-        engine.displayTime,
-      );
+      expect(screen.getByText(/Estimated 1500m performance/i)).toBeInTheDocument();
+      expect(screen.getByText("Central prediction").parentElement).toHaveTextContent(engine.displayTime);
       expect(engine.sourcePerformances[0]?.milliseconds).toBe(135_750);
+      expect(engine.indicativeRange.percent).toBe(1.0);
     }
   });
 
@@ -161,7 +165,8 @@ describe("Tool 01 prediction", () => {
     await enterTime("PB time", "4", "30");
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
 
-    expect(screen.getByText("Estimated equivalent performance").parentElement).toHaveTextContent("9:23");
+    expect(screen.getByText(/Estimated 3000m performance/i)).toBeInTheDocument();
+    expect(screen.getByText("Central prediction").parentElement).toHaveTextContent("9:23");
     expect(screen.getByText("Middle and long-distance scaling")).toBeInTheDocument();
 
     expect(screen.queryByText("1.06-1.0.0")).not.toBeInTheDocument();
@@ -223,7 +228,7 @@ describe("Tool 01 prediction", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Seconds must be less than 60.");
     expect(timeFields("PB time").seconds).toHaveValue("60");
     expect(timeFields("PB time").minutes).toHaveValue("4");
-    expect(screen.queryByText("Estimated equivalent performance")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Estimated .+ performance/i)).not.toBeInTheDocument();
   });
 
   it("asks for the second PB time and keeps the first PB", async () => {
@@ -237,7 +242,7 @@ describe("Tool 01 prediction", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Enter the seconds.");
     expect(timeFields("PB time").minutes).toHaveValue("4");
     expect(timeFields("PB time").seconds).toHaveValue("30");
-    expect(screen.queryByText("Estimated equivalent performance")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Estimated .+ performance/i)).not.toBeInTheDocument();
   });
 
   it("pre-fills healthy average times for the selected PB distance", async () => {
@@ -271,8 +276,8 @@ describe("Tool 01 prediction", () => {
     await user().selectOptions(screen.getByLabelText("Target distance"), "800");
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
 
-    expect(screen.getByText("Estimated equivalent performance")).toBeInTheDocument();
-    expect(screen.getByText("2:18.7")).toBeInTheDocument();
+    expect(screen.getByText(/Estimated 800m performance/i)).toBeInTheDocument();
+    expect(screen.getByText("Central prediction").parentElement).toHaveTextContent("2:18.7");
     expect(screen.getByText(/General estimate from one PB/)).toBeInTheDocument();
     expect(screen.queryByText("This event pairing isn't supported yet.")).not.toBeInTheDocument();
   });
@@ -294,7 +299,7 @@ describe("Tool 01 prediction", () => {
     if (engine.status !== "success") {
       return;
     }
-    const estimate = screen.getByText("Estimated equivalent performance").parentElement;
+    const estimate = screen.getByText(/Estimated 800m performance/i).parentElement;
     expect(estimate).toHaveTextContent(engine.displayTime);
 
     await user().click(screen.getByRole("button", { name: "Reset" }));

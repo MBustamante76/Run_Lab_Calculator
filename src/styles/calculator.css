@@ -587,14 +587,16 @@
   margin-bottom: 8px;
 }
 
-.run-lab-calculator__estimate span,
+.run-lab-calculator__estimate > span,
 .run-lab-calculator__method,
 .run-lab-calculator__warning,
-.run-lab-calculator__how p {
+.run-lab-calculator__how p,
+.run-lab-calculator__range-footnote,
+.run-lab-calculator__range-central-row > span {
   color: #bdbdbd;
 }
 
-.run-lab-calculator__estimate span {
+.run-lab-calculator__estimate > span {
   display: block;
   margin-bottom: 8px;
   font-size: 10px;
@@ -602,9 +604,88 @@
   text-transform: uppercase;
 }
 
-.run-lab-calculator__estimate b {
+.run-lab-calculator__estimate > b {
   font-size: clamp(28px, 4vw, 36px);
   letter-spacing: -0.04em;
+}
+
+.run-lab-calculator__range-central-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.run-lab-calculator__range-central-row strong {
+  color: var(--color-white);
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.run-lab-calculator__range-bar {
+  margin-top: 16px;
+}
+
+.run-lab-calculator__range-bar-central {
+  margin-bottom: 8px;
+  color: var(--color-white);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.run-lab-calculator__range-bar-track {
+  position: relative;
+  height: 14px;
+  background: #2a2a2a;
+  border-radius: 999px;
+  overflow: visible;
+}
+
+.run-lab-calculator__range-bar-segment {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--color-accent);
+  border-radius: 999px;
+}
+
+.run-lab-calculator__range-bar-marker {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  background: #111111;
+  border: 2px solid var(--color-white);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.run-lab-calculator__range-bar-ends {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  color: var(--color-white);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.run-lab-calculator__range-bar-ends span:first-child {
+  margin-left: 0;
+}
+
+.run-lab-calculator__range-bar-ends span:last-child {
+  text-align: right;
+}
+
+.run-lab-calculator__range-footnote {
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .run-lab-calculator__method,

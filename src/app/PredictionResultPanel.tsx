@@ -1,11 +1,11 @@
 import { useId, useState } from "react";
 import { eventById } from "../calculation/events";
 import { formatPerformanceTime } from "../calculation/formatting";
-import { estimatedEquivalentLabel } from "../calculation/prediction/PredictionEngine";
 import type { PredictionSuccess } from "../calculation/prediction/types";
 import { presentRaceMetrics } from "../calculation/raceMetrics";
 import type { RaceMetrics } from "../calculation/types";
 import { Metric } from "./Metric";
+import { PredictionRangeBar } from "./prediction/PredictionRangeBar";
 
 type PredictionResultPanelProps = {
   result: PredictionSuccess;
@@ -31,12 +31,23 @@ export function PredictionResultPanel({ result, metrics }: PredictionResultPanel
   const [open, setOpen] = useState(false);
   const explanationId = useId();
   const attribution = pbAttribution(result);
+  const target = eventById(result.targetEventId);
+  const range = result.indicativeRange;
+  const eyebrow = `Estimated ${target.label} performance`;
 
   return (
     <div className="run-lab-calculator__result" aria-live="polite">
       <div className="run-lab-calculator__estimate">
-        <span>{estimatedEquivalentLabel}</span>
-        <b>{result.displayTime}</b>
+        <span>{eyebrow}</span>
+        <b>
+          {range.displayLow} – {range.displayHigh}
+        </b>
+        <div className="run-lab-calculator__range-central-row">
+          <span>Central prediction</span>
+          <strong>{range.displayCentral}</strong>
+        </div>
+        <PredictionRangeBar range={range} />
+        <p className="run-lab-calculator__range-footnote">{range.footnote}</p>
         <p className="run-lab-calculator__method">{result.methodLabel}</p>
         <p className="run-lab-calculator__attribution">{attribution}</p>
       </div>

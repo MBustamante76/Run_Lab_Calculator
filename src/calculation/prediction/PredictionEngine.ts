@@ -4,6 +4,7 @@ import { formatPredictedDisplayTime } from "../formatting";
 import type { ValidationError } from "../types";
 import { validationError } from "../validation";
 import { EventPairStrategy } from "./EventPairStrategy";
+import { buildIndicativeRange, formatIndicativePercent } from "./indicativeRange";
 import { PowerLawStrategy } from "./PowerLawStrategy";
 import { predictionConfig as defaultConfig } from "./predictionConfig";
 import type { StrategyPerformance, StrategyPrediction } from "./PredictionStrategy";
@@ -92,18 +93,22 @@ function toSuccess(
   }
 
   const targetMetres = eventById(request.targetEventId).metres;
+  const indicativeRange = buildIndicativeRange(prediction.predictedTimeMilliseconds, targetMetres);
+  const percentLabel = formatIndicativePercent(indicativeRange.percent);
+  const rangeExplanation = ` The indicative performance range is ±${percentLabel}% of that central prediction for this target distance.`;
 
   return {
     status: "success",
     predictedTimeMilliseconds: prediction.predictedTimeMilliseconds,
     displayTime: formatPredictedDisplayTime(prediction.predictedTimeMilliseconds, targetMetres),
+    indicativeRange,
     methodId: prediction.methodId,
     methodVersion: prediction.methodVersion,
     methodLabel: prediction.methodLabel,
     sourcePerformances: prediction.sourcePerformances,
     targetEventId: request.targetEventId,
     warnings: allWarnings,
-    explanation: prediction.explanation,
+    explanation: `${prediction.explanation}${rangeExplanation}`,
     isEstimatedEquivalent: true,
   };
 }

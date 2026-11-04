@@ -1,4 +1,5 @@
 import type { ValidationError } from "../types";
+import type { IndicativeRange } from "./indicativeRange";
 
 export type EventId = string;
 
@@ -39,6 +40,7 @@ export type PredictionSuccess = PredictionBase & {
   status: "success";
   predictedTimeMilliseconds: number;
   displayTime: string;
+  indicativeRange: IndicativeRange;
   methodId: MethodId;
   /** Internal and diagnostic use only. Users see `methodLabel`. */
   methodVersion: string;

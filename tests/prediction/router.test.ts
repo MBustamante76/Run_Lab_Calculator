@@ -104,7 +104,11 @@ describe("prediction router", () => {
       expect(result.methodId).toBe("power-law");
       expect(result.displayTime).toBe("9:23");
       expect(result.isEstimatedEquivalent).toBe(true);
-      expect(result.explanation).toBe("Estimated from your 1500m PB of 4:30.0, scaled to 3000m.");
+      expect(result.explanation).toBe(
+        "Estimated from your 1500m PB of 4:30.0, scaled to 3000m. The indicative performance range is ±1.5% of that central prediction for this target distance.",
+      );
+      expect(result.indicativeRange.percent).toBe(1.5);
+      expect(result.indicativeRange.displayCentral).toBe("9:23");
       expect(result.warnings.map((warning) => warning.code)).toEqual(["model-assumption"]);
     }
   });
