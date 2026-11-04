@@ -59,7 +59,7 @@ describe("race metrics", () => {
       "mile | 1 Mile | 1609.344 m | middle | predict, pace, finish, target, splits, profile | splits 400 | route middle",
     );
     expect(lines).toContain(
-      "100 | 100m | 100 m | sprint | profile | splits 100 | route sprint",
+      "100 | 100m | 100 m | sprint | predict, pace, finish, target, splits, profile | splits 100 | route sprint",
     );
     expect(lines).toContain(
       "10k | 10K | 10000 m | long | predict, pace, finish, target, splits, profile | splits 400 | route long",

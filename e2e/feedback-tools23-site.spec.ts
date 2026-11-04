@@ -71,13 +71,13 @@ test.describe("Michael feedback — Tools 02/03 + site-wide", () => {
     await expectMetric(page, "Pace per km", "14:00");
   });
 
-  test("UX-09 / UX-15 10K on Tool 02; 100m/200m stay Tool 06 only", async ({ page }) => {
+  test("UX-09 / UX-15 / UX-20 100m, 200m and 10K available in Tool 02", async ({ page }) => {
     await openTool(page, /02\s*calculate my race pace/i);
-    await expect(page.getByLabel("Race distance").locator('option[value="100"]')).toHaveCount(0);
-    await expect(page.getByLabel("Race distance").locator('option[value="200"]')).toHaveCount(0);
+    await expect(page.getByLabel("Race distance").locator('option[value="100"]')).toHaveCount(1);
+    await expect(page.getByLabel("Race distance").locator('option[value="200"]')).toHaveCount(1);
     await expect(page.getByLabel("Race distance").locator('option[value="10k"]')).toHaveCount(1);
-    await page.getByLabel("Race distance").selectOption("400");
-    await fillStructuredTime(page, { minutes: "0", seconds: "55" });
+    await page.getByLabel("Race distance").selectOption("100");
+    await fillStructuredTime(page, { minutes: "0", seconds: "12.5" });
     await calculate(page);
     await expect(page.getByText(/Sprint paces shown here are averages/i)).toBeVisible();
   });
@@ -94,11 +94,25 @@ test.describe("Michael feedback — Tools 02/03 + site-wide", () => {
     await expectMetric(page, "Average 400 m", "2:36.0");
   });
 
-  test("UX-11 10K on Tool 03; 100m/200m stay Tool 06 only", async ({ page }) => {
+  test("UX-11 / UX-20 100m, 200m and 10K in Tool 03", async ({ page }) => {
     await openTool(page, /03\s*calculate my finishing time/i);
-    await expect(page.getByLabel("Race distance").locator('option[value="100"]')).toHaveCount(0);
-    await expect(page.getByLabel("Race distance").locator('option[value="200"]')).toHaveCount(0);
+    await expect(page.getByLabel("Race distance").locator('option[value="100"]')).toHaveCount(1);
+    await expect(page.getByLabel("Race distance").locator('option[value="200"]')).toHaveCount(1);
     await expect(page.getByLabel("Race distance").locator('option[value="10k"]')).toHaveCount(1);
+  });
+
+  test("UX-20 Tools 01, 04 and 05 also keep 100m and 200m", async ({ page }) => {
+    await openTool(page, /01\s*predict my times/i);
+    await expect(page.getByLabel("PB distance").locator('option[value="100"]')).toHaveCount(1);
+    await expect(page.getByLabel("PB distance").locator('option[value="200"]')).toHaveCount(1);
+
+    await page.getByRole("radio", { name: /04\s*plan my target pb/i }).click();
+    await expect(page.getByLabel("Target distance").locator('option[value="100"]')).toHaveCount(1);
+    await expect(page.getByLabel("Target distance").locator('option[value="200"]')).toHaveCount(1);
+
+    await page.getByRole("radio", { name: /05\s*build my race splits/i }).click();
+    await expect(page.getByLabel("Race distance").locator('option[value="100"]')).toHaveCount(1);
+    await expect(page.getByLabel("Race distance").locator('option[value="200"]')).toHaveCount(1);
   });
 
   test("UX-18 Tool 03 purpose uses approved Sophie copy", async ({ page }) => {
@@ -109,10 +123,10 @@ test.describe("Michael feedback — Tools 02/03 + site-wide", () => {
 
   test("UX-16 Tool 03 sub-minute finish shows seconds suffix", async ({ page }) => {
     await openTool(page, /03\s*calculate my finishing time/i);
-    await page.getByLabel("Race distance").selectOption("400");
+    await page.getByLabel("Race distance").selectOption("100");
     await fillStructuredTime(page, { minutes: "2", seconds: "5" }, "Average pace");
     await calculate(page);
-    await expectMetric(page, "Finishing time", "50.0s");
+    await expectMetric(page, "Finishing time", "12.5s");
   });
 
   test("UX-03 Calculate hover stays amber", async ({ page }) => {
@@ -133,7 +147,7 @@ test.describe("Michael feedback — Tools 02/03 + site-wide", () => {
     expect(overflow).toBe(false);
   });
 
-  test("UX-20 selecting a tool scrolls its panel into view on mobile", async ({ page }) => {
+  test("UX-22 selecting a tool scrolls its panel into view on mobile", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
     await page.getByRole("radio", { name: /06\s*discover my performance profile/i }).click();

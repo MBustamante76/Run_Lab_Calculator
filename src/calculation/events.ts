@@ -29,12 +29,9 @@ const standardTools = [
   "profile",
 ] as const satisfies readonly CalculationToolId[];
 
-/** Brief V3 §5: 100m / 200m are Tool 06 only. */
-const profileOnlyTools = ["profile"] as const satisfies readonly CalculationToolId[];
-
 const catalogue = [
-  ["100", "100m", 100, profileOnlyTools],
-  ["200", "200m", 200, profileOnlyTools],
+  ["100", "100m", 100, standardTools],
+  ["200", "200m", 200, standardTools],
   ["400", "400m", 400, standardTools],
   ["600", "600m", 600, standardTools],
   ["800", "800m", 800, standardTools],

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RunLabCalculatorApp } from "../../src/app/RunLabCalculatorApp";
@@ -9,6 +9,14 @@ import { tools } from "../../src/tools/toolDefinitions";
 function choice(name: RegExp) {
   return screen.getByRole("radio", { name });
 }
+
+const sprintDistanceCases = [
+  { tool: /01\s*predict my times at other distances/i, selectLabel: "PB distance" },
+  { tool: /02\s*calculate my race pace/i, selectLabel: "Race distance" },
+  { tool: /03\s*calculate my finishing time/i, selectLabel: "Race distance" },
+  { tool: /04\s*plan my target pb/i, selectLabel: "Target distance" },
+  { tool: /05\s*build my race splits/i, selectLabel: "Race distance" },
+] as const;
 
 beforeEach(() => {
   HTMLElement.prototype.scrollIntoView = vi.fn();
@@ -40,6 +48,18 @@ describe("calculator shell", () => {
     expect(screen.getByText(calculatorDisclaimer)).toBeInTheDocument();
   });
 
+
+  it("UX-20 regression: Tools 01–05 still offer 100m and 200m in their distance dropdowns", async () => {
+    const user = userEvent.setup();
+    render(<RunLabCalculatorApp />);
+
+    for (const { tool, selectLabel } of sprintDistanceCases) {
+      await user.click(choice(tool));
+      const select = screen.getByLabelText(selectLabel);
+      expect(within(select).getByRole("option", { name: "100m" }), `${selectLabel} on ${tool}`).toBeInTheDocument();
+      expect(within(select).getByRole("option", { name: "200m" }), `${selectLabel} on ${tool}`).toBeInTheDocument();
+    }
+  });
 
   it("switches the active panel among the enabled tools", async () => {
     const user = userEvent.setup();

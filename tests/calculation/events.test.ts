@@ -28,10 +28,8 @@ describe("event configuration", () => {
     expect(countLiteral("src/calculation", "export const events")).toBe(1);
   });
 
-  it("keeps 100m and 200m on Tool 06 only; other distances serve tools 01–06", () => {
-    expect(eventById("100").supportedToolIds).toEqual(["profile"]);
-    expect(eventById("200").supportedToolIds).toEqual(["profile"]);
-    for (const event of events.filter((candidate) => candidate.id !== "100" && candidate.id !== "200")) {
+  it("offers every catalogue distance on tools 01–06", () => {
+    for (const event of events) {
       expect(event.supportedToolIds).toEqual([
         "predict",
         "pace",
@@ -40,6 +38,17 @@ describe("event configuration", () => {
         "splits",
         "profile",
       ]);
+    }
+  });
+
+  it("UX-20 regression: 100m and 200m stay on Tools 01–05, not profile-only", () => {
+    const tools01to05 = ["predict", "pace", "finish", "target", "splits"] as const;
+    for (const id of ["100", "200"] as const) {
+      const supported = eventById(id).supportedToolIds;
+      for (const toolId of tools01to05) {
+        expect(supported, `${id} must remain on Tool ${toolId}`).toContain(toolId);
+      }
+      expect(supported).toContain("profile");
     }
   });
 
