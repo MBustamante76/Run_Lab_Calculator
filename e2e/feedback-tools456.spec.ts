@@ -26,7 +26,7 @@ test.describe("Tools 04 / 05 / 06 / 07", () => {
     await openTool(page, /06\s*discover my performance profile/i);
     await expect(page.getByRole("radio", { name: "Male", exact: true })).toBeChecked();
     await calculate(page);
-    await expect(page.getByLabelText("PB 1 distance")).toHaveCount(0);
+    await expect(page.getByLabel("PB 1 distance")).toHaveCount(0);
     await expect(page.getByText(/Strongest performance|Leading performances/i)).toBeVisible();
     await expect(page.getByText(/\d+ pts/).first()).toBeVisible();
     await expect(page.getByRole("img", { name: /Relative profile gauge/i })).toBeVisible();

@@ -134,16 +134,19 @@
   grid-template-columns: 42px minmax(0, 1fr);
   gap: 14px;
   align-items: start;
+  box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
   min-height: 44px;
   margin: 0 0 10px;
-  padding: 17px;
+  padding: 17px 20px 17px 17px;
   text-align: left;
   color: var(--color-white);
   background: var(--color-choice);
   border: 1px solid #3b3b3b;
   border-radius: var(--radius-choice);
   cursor: pointer;
+  overflow: hidden;
 }
 
 .run-lab-calculator__choice[aria-checked="true"],
@@ -174,13 +177,16 @@
   display: grid;
   gap: 4px;
   min-width: 0;
-  overflow-wrap: anywhere;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .run-lab-calculator__choice-copy strong {
   font-size: 16px;
+  line-height: 1.3;
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   word-break: break-word;
   hyphens: auto;
 }
@@ -188,7 +194,9 @@
 .run-lab-calculator__choice-copy small {
   color: rgba(255, 255, 255, 0.78);
   font-size: 13px;
-  line-height: 1.4;
+  line-height: 1.45;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .run-lab-calculator__future {
@@ -204,6 +212,8 @@
   background: var(--color-panel);
   color: var(--color-text);
   padding: 30px;
+  scroll-margin-top: 24px;
+  outline: none;
 }
 
 .run-lab-calculator h3 {

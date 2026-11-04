@@ -1,3 +1,4 @@
+import { type Ref } from "react";
 import { Tool01Predict } from "../tools/Tool01Predict";
 import { Tool02RacePace } from "../tools/Tool02RacePace";
 import { Tool03FinishingTime } from "../tools/Tool03FinishingTime";
@@ -10,11 +11,12 @@ import { InfoPopover } from "./InfoPopover";
 
 type CalculatorPanelProps = {
   tool: ToolDefinition;
+  panelRef?: Ref<HTMLElement>;
 };
 
-export function CalculatorPanel({ tool }: CalculatorPanelProps) {
+export function CalculatorPanel({ tool, panelRef }: CalculatorPanelProps) {
   return (
-    <section className="run-lab-calculator__panel">
+    <section ref={panelRef} className="run-lab-calculator__panel" tabIndex={-1}>
       <h3>{tool.title}</h3>
       <p className="run-lab-calculator__panel-summary">{tool.description}</p>
       <InfoPopover>{tool.purpose}</InfoPopover>

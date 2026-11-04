@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RunLabCalculatorApp } from "../../src/app/RunLabCalculatorApp";
 import { calculatorDisclaimer } from "../../src/config/copy";
 import { tools } from "../../src/tools/toolDefinitions";
@@ -9,6 +9,14 @@ import { tools } from "../../src/tools/toolDefinitions";
 function choice(name: RegExp) {
   return screen.getByRole("radio", { name });
 }
+
+beforeEach(() => {
+  HTMLElement.prototype.scrollIntoView = vi.fn();
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("calculator shell", () => {
   it("lists all seven tools as available and keeps the WordPress host chrome out", async () => {
@@ -49,6 +57,19 @@ describe("calculator shell", () => {
     choice(/04\s*plan my target pb/i).focus();
     await user.keyboard("{ArrowUp}");
     expect(choice(/03\s*calculate my finishing time/i)).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("scrolls the selected tool panel into view after the first choice", async () => {
+    const user = userEvent.setup();
+    const scrollIntoView = HTMLElement.prototype.scrollIntoView as ReturnType<typeof vi.fn>;
+
+    render(<RunLabCalculatorApp />);
+    expect(scrollIntoView).not.toHaveBeenCalled();
+
+    await user.click(choice(/06\s*discover my performance profile/i));
+    expect(screen.getByRole("heading", { level: 3, name: "Discover my performance profile" })).toBeInTheDocument();
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "start" });
   });
 
   it("opens and closes the purpose text from the keyboard", async () => {
