@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useAutoCalculate } from "../share/useAutoCalculate";
+import { useShareState } from "../share/shareContext";
+import { timeFieldsFromMilliseconds, type ShareState } from "../share/shareState";
 import { ErrorSummary } from "../app/ErrorSummary";
+import { FormLead } from "../app/FormLead";
 import { TargetResultPanel } from "../app/TargetResultPanel";
+import { useScrollIntoViewOnShow } from "../app/useScrollIntoViewOnShow";
 import { eventById, events } from "../calculation/events";
 import { calculateRaceMetrics } from "../calculation/raceMetrics";
 import { parseStructuredTime, readStructuredNumber } from "../calculation/time";
@@ -35,9 +40,20 @@ function messageFor(errors: readonly ValidationError[], fieldId: string): string
 }
 
 export function Tool04TargetPb() {
-  const [form, setForm] = useState<TargetForm>(() => formForEvent(initialEventId));
+  const incoming = useShareState();
+  const targetShare = incoming?.tool === "target" ? incoming : null;
+  const [form, setForm] = useState<TargetForm>(() =>
+    targetShare
+      ? { eventId: targetShare.e, ...timeFieldsFromMilliseconds(targetShare.t, true) }
+      : formForEvent(initialEventId),
+  );
   const [errors, setErrors] = useState<readonly ValidationError[]>([]);
   const [metrics, setMetrics] = useState<RaceMetrics | null>(null);
+  const [share, setShare] = useState<ShareState | null>(null);
+  const [resultScroll, setResultScroll] = useState(0);
+  const resultRef = useRef<HTMLDivElement>(null);
+  useScrollIntoViewOnShow(resultScroll, resultRef);
+  useAutoCalculate(targetShare !== null, calculate);
 
   function calculate() {
     const parsed = parseStructuredTime({
@@ -49,6 +65,7 @@ export function Tool04TargetPb() {
     if (!parsed.ok) {
       setErrors(parsed.errors);
       setMetrics(null);
+      setShare(null);
       return;
     }
 
@@ -56,17 +73,21 @@ export function Tool04TargetPb() {
     if (!result.ok) {
       setErrors(result.errors);
       setMetrics(null);
+      setShare(null);
       return;
     }
 
     setErrors([]);
     setMetrics(result.value);
+    setShare({ tool: "target", e: form.eventId, t: parsed.value.milliseconds });
+    setResultScroll((n) => n + 1);
   }
 
   function reset() {
     setForm(formForEvent(initialEventId));
     setErrors([]);
     setMetrics(null);
+    setShare(null);
   }
 
   const selected = eventById(form.eventId);
@@ -80,9 +101,7 @@ export function Tool04TargetPb() {
       }}
     >
       <ErrorSummary errors={errors} />
-      <p className="run-lab-calculator__form-lead">
-        Enter the distance and target PB time to see the pace and even splits you need.
-      </p>
+      <FormLead toolId="target" />
       <DistanceSelect
         id="target-distance"
         label="Target distance"
@@ -126,7 +145,13 @@ export function Tool04TargetPb() {
           Reset
         </button>
       </div>
-      {metrics ? <TargetResultPanel metrics={metrics} sprintAverages={selected.group === "sprint"} /> : null}
+      {metrics ? (
+        <div ref={resultRef} className="run-lab-calculator__scroll-target">
+          {share ? (
+            <TargetResultPanel metrics={metrics} sprintAverages={selected.group === "sprint"} share={share} />
+          ) : null}
+        </div>
+      ) : null}
     </form>
   );
 }

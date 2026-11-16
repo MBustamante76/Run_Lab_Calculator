@@ -30,13 +30,35 @@ describe("approved production configuration", () => {
     expect(predictionConfig.eventPairs).toEqual([]);
   });
 
-  it("includes middle distances in the power-law lists while keeping pure sprints out", () => {
+  it("includes sprint and middle distances in the power-law lists", () => {
+    expect(predictionConfig.powerLaw.sourceEventIds).toContain("100");
+    expect(predictionConfig.powerLaw.sourceEventIds).toContain("200");
     expect(predictionConfig.powerLaw.sourceEventIds).toContain("400");
     expect(predictionConfig.powerLaw.sourceEventIds).toContain("800");
-    expect(predictionConfig.powerLaw.sourceEventIds).not.toContain("100");
-    expect(predictionConfig.powerLaw.sourceEventIds).not.toContain("200");
     for (const eventId of predictionConfig.powerLaw.sourceEventIds) {
-      expect(eventById(eventId)?.metres, eventId).toBeGreaterThanOrEqual(400);
+      expect(predictionConfig.powerLaw.targetEventIds).toContain(eventId);
+    }
+  });
+
+  it("scales 100m to 200m and 200m to 400m with Riegel 1.06", () => {
+    const hundredToTwo = predictPerformance({
+      performances: [{ eventId: "100", milliseconds: 15_000 }],
+      targetEventId: "200",
+    });
+    expect(hundredToTwo.status).toBe("success");
+    if (hundredToTwo.status === "success") {
+      expect(hundredToTwo.displayTime).toBe("31.3");
+      expect(hundredToTwo.methodLabel).toBe("Distance scaling");
+      expect(hundredToTwo.indicativeRange.percent).toBe(0.5);
+    }
+
+    const twoToFour = predictPerformance({
+      performances: [{ eventId: "200", milliseconds: 30_000 }],
+      targetEventId: "400",
+    });
+    expect(twoToFour.status).toBe("success");
+    if (twoToFour.status === "success") {
+      expect(twoToFour.displayTime).toBe("1:02.5");
     }
   });
 
@@ -69,7 +91,7 @@ describe("approved production configuration", () => {
     const result = predictPerformance({ performances: [pb1500], targetEventId: "3000" });
     expect(result.status).toBe("success");
     if (result.status === "success") {
-      expect(result.methodLabel).toBe("Middle and long-distance scaling");
+      expect(result.methodLabel).toBe("Distance scaling");
       expect(result.methodVersion).toBe("1.06-1.0.0");
       expect(result.methodLabel).not.toMatch(/1\.06|power|exponent|version/i);
       expect(result.explanation).not.toMatch(/1\.06|exponent|version/i);

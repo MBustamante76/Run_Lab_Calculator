@@ -15,18 +15,18 @@ export const predictionConfig: PredictionConfig = {
   },
   // Only approved empirical KsA relationships may be added here. No sex-neutral short-distance coefficients in V1.
   eventPairs: [],
-  // Prototype Riegel fallback (k=1.06). Includes middle distances; sprint→long stays blocked in the strategy.
+  // Riegel fallback (k=1.06). Sprint↔sprint (e.g. 100→200, 200→400) allowed; sprint→long stays blocked in the strategy.
   powerLaw: {
     methodId: "power-law",
     version: "1.06-1.0.0",
-    label: "Middle and long-distance scaling",
+    label: "Distance scaling",
     status: "approved",
     enabled: true,
     exponent: 1.06,
-    sourceEventIds: ["400", "600", "800", "1000", "1500", "mile", "2000", "3000", "5000", "10k"],
-    targetEventIds: ["400", "600", "800", "1000", "1500", "mile", "2000", "3000", "5000", "10k"],
+    sourceEventIds: ["100", "200", "400", "600", "800", "1000", "1500", "mile", "2000", "3000", "5000", "10k"],
+    targetEventIds: ["100", "200", "400", "600", "800", "1000", "1500", "mile", "2000", "3000", "5000", "10k"],
     maximumDistanceRatio: 4,
     warning:
-      "General estimate from one PB. This estimate assumes a similar level of endurance across both distances.",
+      "General estimate from one PB. This is an indicative estimate, not a guarantee — especially for short sprints.",
   },
 };

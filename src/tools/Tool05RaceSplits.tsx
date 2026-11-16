@@ -1,6 +1,11 @@
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
+import { useAutoCalculate } from "../share/useAutoCalculate";
+import { useShareState } from "../share/shareContext";
+import { timeFieldsFromMilliseconds, type ShareState } from "../share/shareState";
 import { ErrorSummary } from "../app/ErrorSummary";
+import { FormLead } from "../app/FormLead";
 import { SplitsResultPanel } from "../app/SplitsResultPanel";
+import { useScrollIntoViewOnShow } from "../app/useScrollIntoViewOnShow";
 import {
   buildCheckpointPlan,
   type CheckpointPlan,
@@ -45,9 +50,25 @@ function messageFor(errors: readonly ValidationError[], fieldId: string): string
 
 export function Tool05RaceSplits() {
   const strategyGroup = useId();
-  const [form, setForm] = useState<SplitsForm>(() => formForEvent(initialEventId));
+  const incoming = useShareState();
+  const splitsShare = incoming?.tool === "splits" ? incoming : null;
+  const [form, setForm] = useState<SplitsForm>(() =>
+    splitsShare
+      ? {
+          eventId: splitsShare.e,
+          pacingStrategy: splitsShare.strategy,
+          splitSpacing: splitsShare.spacing,
+          ...timeFieldsFromMilliseconds(splitsShare.t, true),
+        }
+      : formForEvent(initialEventId),
+  );
   const [errors, setErrors] = useState<readonly ValidationError[]>([]);
   const [plan, setPlan] = useState<CheckpointPlan | null>(null);
+  const [share, setShare] = useState<ShareState | null>(null);
+  const [resultScroll, setResultScroll] = useState(0);
+  const resultRef = useRef<HTMLDivElement>(null);
+  useScrollIntoViewOnShow(resultScroll, resultRef);
+  useAutoCalculate(splitsShare !== null, calculate);
 
   function calculate() {
     const parsed = parseStructuredTime({
@@ -59,6 +80,7 @@ export function Tool05RaceSplits() {
     if (!parsed.ok) {
       setErrors(parsed.errors);
       setPlan(null);
+      setShare(null);
       return;
     }
 
@@ -69,17 +91,27 @@ export function Tool05RaceSplits() {
     if (!result.ok) {
       setErrors(result.errors);
       setPlan(null);
+      setShare(null);
       return;
     }
 
     setErrors([]);
     setPlan(result.value);
+    setShare({
+      tool: "splits",
+      e: form.eventId,
+      t: parsed.value.milliseconds,
+      strategy: form.pacingStrategy,
+      spacing: form.splitSpacing,
+    });
+    setResultScroll((n) => n + 1);
   }
 
   function reset() {
     setForm(formForEvent(initialEventId));
     setErrors([]);
     setPlan(null);
+    setShare(null);
   }
 
   return (
@@ -91,10 +123,7 @@ export function Tool05RaceSplits() {
       }}
     >
       <ErrorSummary errors={errors} />
-      <p className="run-lab-calculator__form-lead">
-        Enter your race distance and goal finishing time to build checkpoint times. Choose even pace
-        or a 2% negative split, and how often to mark the race.
-      </p>
+      <FormLead toolId="splits" />
       <DistanceSelect
         id="splits-distance"
         label="Race distance"
@@ -185,7 +214,11 @@ export function Tool05RaceSplits() {
           Reset
         </button>
       </div>
-      {plan ? <SplitsResultPanel plan={plan} /> : null}
+      {plan ? (
+        <div ref={resultRef} className="run-lab-calculator__scroll-target">
+          {share ? <SplitsResultPanel plan={plan} share={share} /> : null}
+        </div>
+      ) : null}
     </form>
   );
 }

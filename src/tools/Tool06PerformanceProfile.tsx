@@ -1,6 +1,11 @@
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
+import { useAutoCalculate } from "../share/useAutoCalculate";
+import { useShareState } from "../share/shareContext";
+import { timeFieldsFromMilliseconds, type ShareState } from "../share/shareState";
 import { ErrorSummary } from "../app/ErrorSummary";
+import { FormLead } from "../app/FormLead";
 import { ProfileResultPanel } from "../app/ProfileResultPanel";
+import { useScrollIntoViewOnShow } from "../app/useScrollIntoViewOnShow";
 import { events } from "../calculation/events";
 import {
   buildPerformanceProfile,
@@ -66,11 +71,28 @@ function prefixTimeErrors(
   }));
 }
 
+function formFromShare(share: Extract<ShareState, { tool: "profile" }>): ProfileForm {
+  return {
+    sex: share.sex,
+    performances: share.performances.map((row) => ({
+      eventId: row.e,
+      ...timeFieldsFromMilliseconds(row.t, true),
+    })),
+  };
+}
+
 export function Tool06PerformanceProfile() {
   const sexGroup = useId();
-  const [form, setForm] = useState<ProfileForm>(initialForm);
+  const incoming = useShareState();
+  const profileShare = incoming?.tool === "profile" ? incoming : null;
+  const [form, setForm] = useState<ProfileForm>(() => (profileShare ? formFromShare(profileShare) : initialForm));
   const [errors, setErrors] = useState<readonly ValidationError[]>([]);
   const [profile, setProfile] = useState<PerformanceProfile | null>(null);
+  const [share, setShare] = useState<ShareState | null>(null);
+  const [resultScroll, setResultScroll] = useState(0);
+  const resultRef = useRef<HTMLDivElement>(null);
+  useScrollIntoViewOnShow(resultScroll, resultRef);
+  useAutoCalculate(profileShare !== null, calculate);
 
   function updatePb(index: number, patch: Partial<PbRow>) {
     setForm((current) => ({
@@ -100,6 +122,7 @@ export function Tool06PerformanceProfile() {
     if (collected.length > 0) {
       setErrors(collected);
       setProfile(null);
+      setShare(null);
       return;
     }
 
@@ -107,21 +130,30 @@ export function Tool06PerformanceProfile() {
     if (!result.ok) {
       setErrors(result.errors);
       setProfile(null);
+      setShare(null);
       return;
     }
 
     setErrors([]);
     setProfile(result.value);
+    setShare({
+      tool: "profile",
+      sex: form.sex,
+      performances: performances.map((row) => ({ e: row.eventId, t: row.milliseconds })),
+    });
+    setResultScroll((n) => n + 1);
   }
 
   function reset() {
     setForm(initialForm);
     setErrors([]);
     setProfile(null);
+    setShare(null);
   }
 
   function editPerformances() {
     setProfile(null);
+    setShare(null);
   }
 
   function addPb() {
@@ -153,8 +185,8 @@ export function Tool06PerformanceProfile() {
 
   if (profile) {
     return (
-      <div className="run-lab-calculator__form">
-        <ProfileResultPanel profile={profile} />
+      <div ref={resultRef} className="run-lab-calculator__form run-lab-calculator__scroll-target">
+        {share ? <ProfileResultPanel profile={profile} share={share} /> : null}
         <div className="run-lab-calculator__actions">
           <button type="button" className="run-lab-calculator__go" onClick={editPerformances}>
             Edit performances
@@ -176,11 +208,7 @@ export function Tool06PerformanceProfile() {
       }}
     >
       <ErrorSummary errors={errors} />
-      <p className="run-lab-calculator__form-lead">
-        Enter {MIN_PROFILE_PERFORMANCES}–{MAX_PROFILE_PERFORMANCES} race performances to compare them
-        on the World Athletics scale and see whether your results currently lean towards speed,
-        middle-distance or endurance.
-      </p>
+      <FormLead toolId="profile" />
       <fieldset className="run-lab-calculator__units">
         <legend>Sex</legend>
         <label className="run-lab-calculator__unit">

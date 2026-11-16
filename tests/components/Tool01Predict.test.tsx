@@ -137,7 +137,7 @@ describe("Tool 01 prediction", () => {
     expect(screen.getByText(/Estimated 10K performance/i)).toBeInTheDocument();
     expect(screen.getByText("Central prediction").parentElement).toHaveTextContent("37:32");
     expect(screen.getByText(/Indicative performance range using ±1\.5%/i)).toBeInTheDocument();
-    expect(screen.getByText("Middle and long-distance scaling")).toBeInTheDocument();
+    expect(screen.getByText("Distance scaling")).toBeInTheDocument();
   });
 
   it("retains decimal-second precision through a supported middle-distance prediction", async () => {
@@ -167,10 +167,10 @@ describe("Tool 01 prediction", () => {
 
     expect(screen.getByText(/Estimated 3000m performance/i)).toBeInTheDocument();
     expect(screen.getByText("Central prediction").parentElement).toHaveTextContent("9:23");
-    expect(screen.getByText("Middle and long-distance scaling")).toBeInTheDocument();
+    expect(screen.getByText("Distance scaling")).toBeInTheDocument();
 
     expect(screen.queryByText("1.06-1.0.0")).not.toBeInTheDocument();
-    expect(screen.getByText(/similar level of endurance/)).toBeInTheDocument();
+    expect(screen.getByText(/indicative estimate, not a guarantee/i)).toBeInTheDocument();
 
     const prediction = predictPerformance({
       performances: [{ eventId: "1500", milliseconds: 270_000 }],
@@ -199,7 +199,7 @@ describe("Tool 01 prediction", () => {
     await user().selectOptions(screen.getByLabelText("Target distance"), "5000");
     await user().click(screen.getByRole("button", { name: "Calculate my result" }));
 
-    expect(screen.getByText("Middle and long-distance scaling")).toBeInTheDocument();
+    expect(screen.getByText("Distance scaling")).toBeInTheDocument();
     expect(screen.getByText(/3000m PB only/)).toBeInTheDocument();
   });
 

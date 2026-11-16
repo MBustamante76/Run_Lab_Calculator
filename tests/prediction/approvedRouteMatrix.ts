@@ -1,18 +1,9 @@
-/**
- * Approved V1 one-PB route matrix. 12 sources × 11 targets.
- * Change this only when a route is deliberately approved.
- * Middle-distance single-PB routes use Riegel k=1.06 (prototype behaviour).
- */
 export type OnePbStrategy = "UNSUPPORTED" | "POWER_LAW";
 
-export type ApprovedRoute = {
-  source: string;
-  target: string;
-  strategy: OnePbStrategy;
-};
-
-export const approvedOnePbRouteMatrix = [  { source: "100m", target: "200m", strategy: "UNSUPPORTED" },
-  { source: "100m", target: "400m", strategy: "UNSUPPORTED" },
+/** Exhaustive one-PB routing expectations for the approved Tool 01 configuration. */
+export const approvedOnePbRouteMatrix = [
+  { source: "100m", target: "200m", strategy: "POWER_LAW" },
+  { source: "100m", target: "400m", strategy: "POWER_LAW" },
   { source: "100m", target: "600m", strategy: "UNSUPPORTED" },
   { source: "100m", target: "800m", strategy: "UNSUPPORTED" },
   { source: "100m", target: "1000m", strategy: "UNSUPPORTED" },
@@ -22,10 +13,10 @@ export const approvedOnePbRouteMatrix = [  { source: "100m", target: "200m", str
   { source: "100m", target: "3000m", strategy: "UNSUPPORTED" },
   { source: "100m", target: "5000m", strategy: "UNSUPPORTED" },
   { source: "100m", target: "10K", strategy: "UNSUPPORTED" },
-  { source: "200m", target: "100m", strategy: "UNSUPPORTED" },
-  { source: "200m", target: "400m", strategy: "UNSUPPORTED" },
-  { source: "200m", target: "600m", strategy: "UNSUPPORTED" },
-  { source: "200m", target: "800m", strategy: "UNSUPPORTED" },
+  { source: "200m", target: "100m", strategy: "POWER_LAW" },
+  { source: "200m", target: "400m", strategy: "POWER_LAW" },
+  { source: "200m", target: "600m", strategy: "POWER_LAW" },
+  { source: "200m", target: "800m", strategy: "POWER_LAW" },
   { source: "200m", target: "1000m", strategy: "UNSUPPORTED" },
   { source: "200m", target: "1500m", strategy: "UNSUPPORTED" },
   { source: "200m", target: "1 Mile", strategy: "UNSUPPORTED" },
@@ -33,8 +24,8 @@ export const approvedOnePbRouteMatrix = [  { source: "100m", target: "200m", str
   { source: "200m", target: "3000m", strategy: "UNSUPPORTED" },
   { source: "200m", target: "5000m", strategy: "UNSUPPORTED" },
   { source: "200m", target: "10K", strategy: "UNSUPPORTED" },
-  { source: "400m", target: "100m", strategy: "UNSUPPORTED" },
-  { source: "400m", target: "200m", strategy: "UNSUPPORTED" },
+  { source: "400m", target: "100m", strategy: "POWER_LAW" },
+  { source: "400m", target: "200m", strategy: "POWER_LAW" },
   { source: "400m", target: "600m", strategy: "POWER_LAW" },
   { source: "400m", target: "800m", strategy: "POWER_LAW" },
   { source: "400m", target: "1000m", strategy: "POWER_LAW" },
@@ -45,7 +36,7 @@ export const approvedOnePbRouteMatrix = [  { source: "100m", target: "200m", str
   { source: "400m", target: "5000m", strategy: "UNSUPPORTED" },
   { source: "400m", target: "10K", strategy: "UNSUPPORTED" },
   { source: "600m", target: "100m", strategy: "UNSUPPORTED" },
-  { source: "600m", target: "200m", strategy: "UNSUPPORTED" },
+  { source: "600m", target: "200m", strategy: "POWER_LAW" },
   { source: "600m", target: "400m", strategy: "POWER_LAW" },
   { source: "600m", target: "800m", strategy: "POWER_LAW" },
   { source: "600m", target: "1000m", strategy: "POWER_LAW" },
@@ -56,7 +47,7 @@ export const approvedOnePbRouteMatrix = [  { source: "100m", target: "200m", str
   { source: "600m", target: "5000m", strategy: "UNSUPPORTED" },
   { source: "600m", target: "10K", strategy: "UNSUPPORTED" },
   { source: "800m", target: "100m", strategy: "UNSUPPORTED" },
-  { source: "800m", target: "200m", strategy: "UNSUPPORTED" },
+  { source: "800m", target: "200m", strategy: "POWER_LAW" },
   { source: "800m", target: "400m", strategy: "POWER_LAW" },
   { source: "800m", target: "600m", strategy: "POWER_LAW" },
   { source: "800m", target: "1000m", strategy: "POWER_LAW" },
@@ -143,4 +134,4 @@ export const approvedOnePbRouteMatrix = [  { source: "100m", target: "200m", str
   { source: "10K", target: "2000m", strategy: "UNSUPPORTED" },
   { source: "10K", target: "3000m", strategy: "POWER_LAW" },
   { source: "10K", target: "5000m", strategy: "POWER_LAW" },
-] as const satisfies readonly ApprovedRoute[];
+] as const;

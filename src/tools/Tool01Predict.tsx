@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useAutoCalculate } from "../share/useAutoCalculate";
+import { useShareState } from "../share/shareContext";
+import { timeFieldsFromMilliseconds, type ShareState } from "../share/shareState";
 import { eventById, events } from "../calculation/events";
 import { predictPerformance } from "../calculation/prediction/PredictionEngine";
 import type { PredictionSuccess } from "../calculation/prediction/types";
@@ -6,7 +9,9 @@ import { calculateRaceMetrics } from "../calculation/raceMetrics";
 import { parseStructuredTime, readStructuredNumber } from "../calculation/time";
 import type { RaceMetrics, ValidationError } from "../calculation/types";
 import { ErrorSummary } from "../app/ErrorSummary";
+import { FormLead } from "../app/FormLead";
 import { PredictionResultPanel } from "../app/PredictionResultPanel";
+import { useScrollIntoViewOnShow } from "../app/useScrollIntoViewOnShow";
 import {
   candidatePairingNotice,
   isCandidateEventPair,
@@ -86,15 +91,38 @@ function unsupportedMessageFor(
   return explanation;
 }
 
+function formFromShare(share: Extract<ShareState, { tool: "predict" }>): PredictForm {
+  const first = timeFieldsFromMilliseconds(share.t1, false);
+  const second = share.t2 !== undefined ? timeFieldsFromMilliseconds(share.t2, false) : defaultTimeForEvent("800");
+  return {
+    firstEventId: share.e1,
+    firstMinutes: first.minutes,
+    firstSeconds: first.seconds,
+    secondEnabled: share.e2 !== undefined && share.t2 !== undefined,
+    secondEventId: share.e2 ?? "800",
+    secondMinutes: second.minutes,
+    secondSeconds: second.seconds,
+    targetEventId: share.target,
+  };
+}
+
 export function Tool01Predict() {
-  const [form, setForm] = useState<PredictForm>(() => initialForm());
+  const incoming = useShareState();
+  const predictShare = incoming?.tool === "predict" ? incoming : null;
+  const [form, setForm] = useState<PredictForm>(() => (predictShare ? formFromShare(predictShare) : initialForm()));
 
   const [errors, setErrors] = useState<readonly ValidationError[]>([]);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
+  const [share, setShare] = useState<ShareState | null>(null);
+  const [resultScroll, setResultScroll] = useState(0);
+  const outcomeRef = useRef<HTMLDivElement>(null);
+  useScrollIntoViewOnShow(resultScroll, outcomeRef);
+  useAutoCalculate(predictShare !== null, calculate);
 
   function update(next: PredictForm) {
     setForm(withDistinctEvents(next));
     setOutcome(null);
+    setShare(null);
   }
 
   function calculate() {
@@ -126,6 +154,7 @@ export function Tool01Predict() {
     if (collected.length > 0) {
       setErrors(collected);
       setOutcome(null);
+      setShare(null);
       return;
     }
 
@@ -133,6 +162,7 @@ export function Tool01Predict() {
     if (result.status === "invalid") {
       setErrors(result.errors);
       setOutcome(null);
+      setShare(null);
       return;
     }
 
@@ -142,6 +172,8 @@ export function Tool01Predict() {
         status: "unsupported",
         message: unsupportedMessageFor(result.explanation, performances, form.targetEventId),
       });
+      setShare(null);
+      setResultScroll((n) => n + 1);
       return;
     }
 
@@ -149,16 +181,28 @@ export function Tool01Predict() {
     if (!metrics.ok) {
       setErrors(metrics.errors);
       setOutcome(null);
+      setShare(null);
       return;
     }
 
     setOutcome({ status: "success", result, metrics: metrics.value });
+    setShare({
+      tool: "predict",
+      e1: performances[0].eventId,
+      t1: performances[0].milliseconds,
+      target: form.targetEventId,
+      ...(performances[1]
+        ? { e2: performances[1].eventId, t2: performances[1].milliseconds }
+        : {}),
+    });
+    setResultScroll((n) => n + 1);
   }
 
   function reset() {
     setForm(initialForm());
     setErrors([]);
     setOutcome(null);
+    setShare(null);
   }
 
   function setFirstDistance(firstEventId: string) {
@@ -185,9 +229,7 @@ export function Tool01Predict() {
         calculate();
       }}
     >
-      <p className="run-lab-calculator__form-lead">
-        Enter a PB, optionally add another PB, then choose the target distance.
-      </p>
+      <FormLead toolId="predict" />
       <ErrorSummary errors={errors} />
       <div className={form.secondEnabled ? "run-lab-calculator__pb-group" : undefined}>
         <div className="run-lab-calculator__pb">
@@ -295,13 +337,16 @@ export function Tool01Predict() {
           Reset
         </button>
       </div>
-      {outcome?.status === "success" ? (
-        <PredictionResultPanel result={outcome.result} metrics={outcome.metrics} />
-      ) : null}
-      {outcome?.status === "unsupported" ? (
-        <p className="run-lab-calculator__unsupported" role="status">
-          {outcome.message}
-        </p>
+      {outcome ? (
+        <div ref={outcomeRef} className="run-lab-calculator__scroll-target">
+          {outcome.status === "success" && share ? (
+            <PredictionResultPanel result={outcome.result} metrics={outcome.metrics} share={share} />
+          ) : outcome.status === "unsupported" ? (
+            <p className="run-lab-calculator__unsupported" role="status">
+              {outcome.message}
+            </p>
+          ) : null}
+        </div>
       ) : null}
     </form>
   );

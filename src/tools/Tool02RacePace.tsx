@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useAutoCalculate } from "../share/useAutoCalculate";
+import { useShareState } from "../share/shareContext";
+import { timeFieldsFromMilliseconds, type ShareState } from "../share/shareState";
 import { eventById, events } from "../calculation/events";
 import { calculateRaceMetrics } from "../calculation/raceMetrics";
 import { parseStructuredTime, readStructuredNumber } from "../calculation/time";
 import type { RaceMetrics, ValidationError } from "../calculation/types";
 import { ErrorSummary } from "../app/ErrorSummary";
+import { FormLead } from "../app/FormLead";
 import { ResultPanel } from "../app/ResultPanel";
+import { useScrollIntoViewOnShow } from "../app/useScrollIntoViewOnShow";
 import { defaultTimeForEvent } from "../config/defaultTimes";
 import { DistanceSelect } from "../fields/DistanceSelect";
 import { StructuredTimeInput } from "../fields/StructuredTimeInput";
@@ -35,9 +40,20 @@ function messageFor(errors: readonly ValidationError[], fieldId: string): string
 }
 
 export function Tool02RacePace() {
-  const [form, setForm] = useState<PaceForm>(() => formForEvent(initialEventId));
+  const incoming = useShareState();
+  const paceShare = incoming?.tool === "pace" ? incoming : null;
+  const [form, setForm] = useState<PaceForm>(() =>
+    paceShare
+      ? { eventId: paceShare.e, ...timeFieldsFromMilliseconds(paceShare.t, true) }
+      : formForEvent(initialEventId),
+  );
   const [errors, setErrors] = useState<readonly ValidationError[]>([]);
   const [metrics, setMetrics] = useState<RaceMetrics | null>(null);
+  const [share, setShare] = useState<ShareState | null>(null);
+  const [resultScroll, setResultScroll] = useState(0);
+  const resultRef = useRef<HTMLDivElement>(null);
+  useScrollIntoViewOnShow(resultScroll, resultRef);
+  useAutoCalculate(paceShare !== null, calculate);
 
   function calculate() {
     const parsed = parseStructuredTime({
@@ -49,6 +65,7 @@ export function Tool02RacePace() {
     if (!parsed.ok) {
       setErrors(parsed.errors);
       setMetrics(null);
+      setShare(null);
       return;
     }
 
@@ -56,17 +73,21 @@ export function Tool02RacePace() {
     if (!result.ok) {
       setErrors(result.errors);
       setMetrics(null);
+      setShare(null);
       return;
     }
 
     setErrors([]);
     setMetrics(result.value);
+    setShare({ tool: "pace", e: form.eventId, t: parsed.value.milliseconds });
+    setResultScroll((n) => n + 1);
   }
 
   function reset() {
     setForm(formForEvent(initialEventId));
     setErrors([]);
     setMetrics(null);
+    setShare(null);
   }
 
   const selected = eventById(form.eventId);
@@ -80,6 +101,7 @@ export function Tool02RacePace() {
       }}
     >
       <ErrorSummary errors={errors} />
+      <FormLead toolId="pace" />
       <DistanceSelect
         id="pace-distance"
         label="Race distance"
@@ -123,7 +145,13 @@ export function Tool02RacePace() {
           Reset
         </button>
       </div>
-      {metrics ? <ResultPanel metrics={metrics} sprintAverages={selected.group === "sprint"} /> : null}
+      {metrics ? (
+        <div ref={resultRef} className="run-lab-calculator__scroll-target">
+          {share ? (
+            <ResultPanel metrics={metrics} sprintAverages={selected.group === "sprint"} share={share} />
+          ) : null}
+        </div>
+      ) : null}
     </form>
   );
 }

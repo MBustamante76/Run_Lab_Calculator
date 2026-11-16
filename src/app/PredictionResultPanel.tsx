@@ -4,12 +4,15 @@ import { formatPerformanceTime } from "../calculation/formatting";
 import type { PredictionSuccess } from "../calculation/prediction/types";
 import { presentRaceMetrics } from "../calculation/raceMetrics";
 import type { RaceMetrics } from "../calculation/types";
+import { ShareableResult } from "../share/ShareableResult";
+import type { ShareState } from "../share/shareState";
 import { Metric } from "./Metric";
 import { PredictionRangeBar } from "./prediction/PredictionRangeBar";
 
 type PredictionResultPanelProps = {
   result: PredictionSuccess;
   metrics: RaceMetrics;
+  share: ShareState;
 };
 
 function pbAttribution(result: PredictionSuccess): string {
@@ -26,7 +29,7 @@ function pbAttribution(result: PredictionSuccess): string {
   return `Based on ${parts.join(", ")}.`;
 }
 
-export function PredictionResultPanel({ result, metrics }: PredictionResultPanelProps) {
+export function PredictionResultPanel({ result, metrics, share }: PredictionResultPanelProps) {
   const presented = presentRaceMetrics(metrics);
   const [open, setOpen] = useState(false);
   const explanationId = useId();
@@ -36,7 +39,7 @@ export function PredictionResultPanel({ result, metrics }: PredictionResultPanel
   const eyebrow = `Estimated ${target.label} performance`;
 
   return (
-    <div className="run-lab-calculator__result" aria-live="polite">
+    <ShareableResult state={share}>
       <div className="run-lab-calculator__estimate">
         <span>{eyebrow}</span>
         <b>
@@ -75,6 +78,6 @@ export function PredictionResultPanel({ result, metrics }: PredictionResultPanel
         {open ? <p id={explanationId}>{result.explanation}</p> : null}
       </div>
       <p className="run-lab-calculator__result-note">{presented.note}</p>
-    </div>
+    </ShareableResult>
   );
 }

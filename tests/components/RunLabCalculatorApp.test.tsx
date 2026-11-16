@@ -24,6 +24,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  delete window.runLabCalculatorCopy;
 });
 
 describe("calculator shell", () => {
@@ -103,6 +104,22 @@ describe("calculator shell", () => {
     expect(purpose).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByText(/Imagine Sarah has a 1500m PB of 5:30/i)).not.toBeInTheDocument();
     expect(screen.getByText(calculatorDisclaimer)).toBeInTheDocument();
+  });
+
+  it("uses WordPress copy overrides for purpose and disclaimer", () => {
+    window.runLabCalculatorCopy = {
+      disclaimer: "Custom disclaimer from WordPress.",
+      tools: {
+        predict: { purpose: "Custom Sarah example from WordPress." },
+      },
+    };
+
+    render(<RunLabCalculatorApp />);
+
+    expect(screen.getByText("Custom disclaimer from WordPress.")).toBeInTheDocument();
+    expect(screen.getByText("Custom Sarah example from WordPress.")).toBeInTheDocument();
+    expect(screen.queryByText(calculatorDisclaimer)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Imagine Sarah has a 1500m PB of 5:30/i)).not.toBeInTheDocument();
   });
 });
 

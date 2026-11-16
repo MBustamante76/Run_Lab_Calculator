@@ -4,15 +4,18 @@ import {
   profileGuideNote,
   type PerformanceProfile,
 } from "../calculation/profile/worldAthleticsPoints";
+import { ShareableResult } from "../share/ShareableResult";
+import type { ShareState } from "../share/shareState";
 import { Metric } from "./Metric";
 import { ProfileBarChart } from "./profile/ProfileBarChart";
 import { ProfileGauge } from "./profile/ProfileGauge";
 
 type ProfileResultPanelProps = {
   profile: PerformanceProfile;
+  share: ShareState;
 };
 
-export function ProfileResultPanel({ profile }: ProfileResultPanelProps) {
+export function ProfileResultPanel({ profile, share }: ProfileResultPanelProps) {
   const sexLabel = profile.sex === "M" ? "male" : "female";
   const strongest = profile.performances.find(
     (performance) => performance.eventId === profile.strongestEventId,
@@ -42,7 +45,7 @@ export function ProfileResultPanel({ profile }: ProfileResultPanelProps) {
     : "";
 
   return (
-    <div className="run-lab-calculator__result run-lab-calculator__result--profile" aria-live="polite">
+    <ShareableResult state={share} className="run-lab-calculator__result--profile">
       <Metric label={strongestLabel} value={strongestValue} primary />
       {strongestDetail ? (
         <p className="run-lab-calculator__profile-detail">{strongestDetail}</p>
@@ -69,6 +72,6 @@ export function ProfileResultPanel({ profile }: ProfileResultPanelProps) {
       <p className="run-lab-calculator__result-note">
         {profileGuideNote} Tables: {profile.edition} ({sexLabel}).
       </p>
-    </div>
+    </ShareableResult>
   );
 }

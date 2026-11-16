@@ -34,7 +34,7 @@ const catalogue = [
     title: "Plan my target PB",
     description: "See the pace and splits needed to reach your next goal.",
     purpose:
-      "Maya wants to run 1500m in 5:00. What pace does that take, and what should each 400m feel like?\n\nEnter a target distance and goal time to see the required pace, speed and even splits.\n\nIt's like turning a dream PB into a practical race plan.\n\nThese are even-pace averages. Race day may vary.",
+      "Omar has a 1500m PB of 5:10. His next goal is to break 5 minutes. But what pace does he need to run?\n\nEnter your target distance and finishing time to discover the pace and splits needed to reach your goal.\n\nThink of it like planning a journey. Rather than just knowing where you want to finish, you can see the checkpoints along the way.\n\nIt's a pacing plan, not a guarantee. The hard work still happens on the track.",
   },
   {
     id: "splits",
@@ -42,7 +42,7 @@ const catalogue = [
     title: "Build my race splits",
     description: "Create clear checkpoint times for your chosen race.",
     purpose:
-      "Alex is racing 5000m and wants to know what the clock should say at each kilometre for a 20:00 finish.\n\nEnter the race distance and goal time, choose even pace or a 2% negative split, and pick how often to mark the race.\n\nIt's like a simple race roadmap from start to finish.\n\nReal races often vary slightly from lap to lap.",
+      "Javier wants to run 800m in 2:20. Should he run both laps at exactly the same speed?\n\nChoose your race distance, target time and pacing strategy to build a set of race splits.\n\nThink of it like having a race map. Each checkpoint tells you where you should be, helping you judge your effort and stay on track.\n\nYour splits are a guide. Real races rarely go exactly to plan.",
   },
   {
     id: "profile",
@@ -50,7 +50,7 @@ const catalogue = [
     title: "Discover my performance profile",
     description: "Compare your performances and discover where your running strengths currently lie.",
     purpose:
-      "How does it work?\n\nEnter between 2 and 6 PBs from any of the available distances. RUN-LAB converts each performance to its corresponding World Athletics performance score and compares the results.\n\nA higher relative score represents a stronger performance. RUN-LAB then looks at where your strongest results sit across the speed-to-endurance range to create your performance profile.\n\nYou do not need to have raced every distance. Just enter the PBs you know.\n\nThis is a performance comparison rather than a physiological assessment. Training history, race conditions, surface and how recently each PB was achieved can all influence the picture.",
+      "Layla runs 800m, 1500m and 3000m. But which is actually her strongest event?\n\nEnter your personal bests to compare your performances using World Athletics points.\n\nYou might be good at 800m, better at 1500m and strongest at 3000m. But how can you tell when the distances are so different? That's where the points come in.\n\nDiscover your strengths, spot opportunities and see where you might improve next.\n\nIt's a snapshot of where you are today, not a limit on what you can achieve tomorrow.",
   },
   {
     id: "ageGrade",
@@ -58,7 +58,7 @@ const catalogue = [
     title: "Age-grade my performance",
     description: "See how good a race is when age and sex are taken into account.",
     purpose:
-      "Pat is 45 and has just run 5K in 22:00. How does that compare once age is factored in?\n\nEnter sex, age, distance and time to get an age-grade percentage and an open-equivalent time.\n\nIt's a fair way to compare performances across age groups.\n\nScores use the 2025 USATF MLDR / WMA road standards.",
+      "Pat is 45 and has just run 5K in 22 minutes. But how good is that performance for someone of Pat's age?\n\nEnter your age, sex, race distance and finishing time to discover your age-grade percentage.\n\nThink of it like giving everyone a fairer starting point. A 60-year-old and a 25-year-old might run different times, but both could produce equally impressive performances for their age.\n\nYou'll also see an equivalent time showing how your performance compares with an open-age runner.\n\nIt's a way to celebrate what you can do at your age, not just how fast you run.",
   },
 ] as const satisfies readonly Omit<ToolDefinition, "enabled">[];
 

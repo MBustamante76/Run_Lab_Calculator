@@ -62,6 +62,16 @@ test.describe("Michael feedback — Tool 01 Testing Log + UX", () => {
     await expect(page.getByText(/General estimate from one PB/i)).toBeVisible();
   });
 
+  test("Sprint hop — 100m 15s → 200m ≈ 31.3 with range", async ({ page }) => {
+    await page.getByLabel("PB distance").selectOption("100");
+    await fillStructuredTime(page, { minutes: "0", seconds: "15" }, "PB time");
+    await page.getByLabel("Target distance").selectOption("200");
+    await calculate(page);
+    await expectEstimate(page, "31.3");
+    await expect(page.getByText("Distance scaling")).toBeVisible();
+    await expect(page.getByText(/Indicative performance range using ±0\.5%/i)).toBeVisible();
+  });
+
   test("Test 05 + UX-05 — two PBs name both anchors", async ({ page }) => {
     await page.getByLabel("PB distance").selectOption("1500");
     await fillStructuredTime(page, { minutes: "4", seconds: "30" }, "PB time");

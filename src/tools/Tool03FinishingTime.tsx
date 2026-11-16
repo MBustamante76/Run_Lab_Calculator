@@ -1,10 +1,15 @@
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
+import { useAutoCalculate } from "../share/useAutoCalculate";
+import { useShareState } from "../share/shareContext";
+import { timeFieldsFromMilliseconds, type ShareState } from "../share/shareState";
 import { eventById, events } from "../calculation/events";
 import { finishingTimeMetrics, type PaceUnit } from "../calculation/finishingTime";
 import { parseStructuredTime, readStructuredNumber } from "../calculation/time";
 import type { RaceMetrics, ValidationError } from "../calculation/types";
 import { ErrorSummary } from "../app/ErrorSummary";
+import { FormLead } from "../app/FormLead";
 import { FinishingResultPanel } from "../app/FinishingResultPanel";
+import { useScrollIntoViewOnShow } from "../app/useScrollIntoViewOnShow";
 import { DistanceSelect } from "../fields/DistanceSelect";
 import { StructuredTimeInput } from "../fields/StructuredTimeInput";
 
@@ -32,10 +37,21 @@ function messageFor(errors: readonly ValidationError[], fieldId: string): string
 
 export function Tool03FinishingTime() {
   const unitGroup = useId();
-  const [form, setForm] = useState<FinishForm>(emptyForm);
+  const incoming = useShareState();
+  const finishShare = incoming?.tool === "finish" ? incoming : null;
+  const [form, setForm] = useState<FinishForm>(() =>
+    finishShare
+      ? { eventId: finishShare.e, unit: finishShare.unit, ...timeFieldsFromMilliseconds(finishShare.t, true) }
+      : emptyForm,
+  );
   const [errors, setErrors] = useState<readonly ValidationError[]>([]);
   const [metrics, setMetrics] = useState<RaceMetrics | null>(null);
+  const [share, setShare] = useState<ShareState | null>(null);
   const [resultUnit, setResultUnit] = useState<PaceUnit>("kilometre");
+  const [resultScroll, setResultScroll] = useState(0);
+  const resultRef = useRef<HTMLDivElement>(null);
+  useScrollIntoViewOnShow(resultScroll, resultRef);
+  useAutoCalculate(finishShare !== null, calculate);
 
   function calculate() {
     const parsed = parseStructuredTime({
@@ -47,6 +63,7 @@ export function Tool03FinishingTime() {
     if (!parsed.ok) {
       setErrors(parsed.errors);
       setMetrics(null);
+      setShare(null);
       return;
     }
 
@@ -58,18 +75,22 @@ export function Tool03FinishingTime() {
     if (!result.ok) {
       setErrors(result.errors);
       setMetrics(null);
+      setShare(null);
       return;
     }
 
     setErrors([]);
     setResultUnit(form.unit);
     setMetrics(result.value);
+    setShare({ tool: "finish", e: form.eventId, t: parsed.value.milliseconds, unit: form.unit });
+    setResultScroll((n) => n + 1);
   }
 
   function reset() {
     setForm(emptyForm);
     setErrors([]);
     setMetrics(null);
+    setShare(null);
     setResultUnit("kilometre");
   }
 
@@ -87,6 +108,7 @@ export function Tool03FinishingTime() {
       }}
     >
       <ErrorSummary errors={errors} />
+      <FormLead toolId="finish" />
       <DistanceSelect
         id="finish-distance"
         label="Race distance"
@@ -151,7 +173,11 @@ export function Tool03FinishingTime() {
           Reset
         </button>
       </div>
-      {metrics ? <FinishingResultPanel metrics={metrics} unit={resultUnit} /> : null}
+      {metrics ? (
+        <div ref={resultRef} className="run-lab-calculator__scroll-target">
+          {share ? <FinishingResultPanel metrics={metrics} unit={resultUnit} share={share} /> : null}
+        </div>
+      ) : null}
     </form>
   );
 }

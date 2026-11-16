@@ -15,7 +15,7 @@ The router checks inputs, then tries methods in a fixed order. The first method 
 1. **Validate.** One or two PBs. Each PB must have a supported distance and a time greater than zero. Two PBs must be at different distances. The target may not match either PB distance. Any failure returns `invalid` with field errors.
 2. **Two-PB interpolation.** Used only when two PBs are given, the target lies strictly between them, and the longer anchor is no more than 4 times the shorter one.
 3. **Event-pair relationship.** Tried from the nearest PB first. Used only when an approved empirical KsA relationship exists for that PB distance and the target. None are configured yet.
-4. **Power-law fallback.** Tried from the nearest PB first. Used when both distances are on the approved power-law lists (400m through 10K, excluding pure sprints 100m/200m) and the longer distance is no more than 4 times the shorter. Same Riegel exponent as the approved prototype: **k = 1.06**.
+4. **Power-law fallback.** Tried from the nearest PB first. Used when both distances are on the approved power-law lists (100m through 10K) and the longer distance is no more than 4 times the shorter. Same Riegel exponent as the approved prototype: **k = 1.06**. Short sprint hops are indicative estimates only.
 5. **Unsupported.** No time is returned.
 
 "Nearest" is measured as a distance ratio, so 1500 m is nearer to 3000 m than 800 m is.
@@ -38,11 +38,11 @@ Single-PB routes under the approved configuration. `P` means the power-law fallb
 
 | PB ↓ / Target → | 100 | 200 | 400 | 600 | 800 | 1000 | 1500 | Mile | 2000 | 3000 | 5000 | 10K |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 100m | — | U | U | U | U | U | U | U | U | U | U | U |
-| 200m | U | — | U | U | U | U | U | U | U | U | U | U |
-| 400m | U | U | — | P | P | P | P | U | U | U | U | U |
-| 600m | U | U | P | — | P | P | P | P | P | U | U | U |
-| 800m | U | U | P | P | — | P | P | P | P | P | U | U |
+| 100m | — | P | P | U | U | U | U | U | U | U | U | U |
+| 200m | P | — | P | P | P | U | U | U | U | U | U | U |
+| 400m | P | P | — | P | P | P | P | U | U | U | U | U |
+| 600m | U | P | P | — | P | P | P | P | P | U | U | U |
+| 800m | U | P | P | P | — | P | P | P | P | P | U | U |
 | 1000m | U | U | P | P | P | — | P | P | P | P | U | U |
 | 1500m | U | U | P | P | P | P | — | P | P | P | P | U |
 | 1 Mile | U | U | U | P | P | P | P | — | P | P | P | U |
@@ -53,7 +53,7 @@ Single-PB routes under the approved configuration. `P` means the power-law fallb
 
 Two PBs add interpolation for any target strictly between them, when the anchors are no more than 4 times apart.
 
-Routes that remain unsupported for a single PB include: identical events (invalid), distance ratio above 4, pure sprint sources (100m/200m), and sprint→long hard blocks (100m, 200m or 400m to 3000m, 5000m or 10K).
+Routes that remain unsupported for a single PB include: identical events (invalid), distance ratio above 4, and sprint→long hard blocks (100m, 200m or 400m to 3000m, 5000m or 10K).
 
 ## 3. Approved and unapproved routes
 
@@ -63,7 +63,7 @@ Routes that remain unsupported for a single PB include: identical events (invali
 | Single PB on the power-law lists, ratio ≤ 4 | Approved | Prototype Riegel k=1.06 general estimate |
 | 1500m → 800m (and other middle-distance single-PB routes within ratio 4) | Approved | Same Riegel fallback as the approved prototype |
 | 1500m, 1 Mile and 2000m to 10K | Unsupported | Distance ratio above 4 |
-| 100m or 200m as a single PB to any target | Unsupported | Not on the power-law source list |
+| 100m → 200m, 200m → 400m (and other short hops within ratio 4) | Approved | Same Riegel ^1.06 formula; labelled as an indicative estimate |
 | 100m, 200m or 400m to 3000m, 5000m or 10K | Blocked in code | A sprint PB never routes to a long-distance target, whatever the configuration |
 
 ## 4. Configured methods
@@ -84,14 +84,15 @@ Routes that remain unsupported for a single PB include: identical events (invali
 
 ### Power-law fallback
 
-- User-facing label: "Middle and long-distance scaling"
+- User-facing label: "Distance scaling"
 - Version: `1.06-1.0.0`
 - Exponent: **1.06**. Same approved Riegel constant as the prototype (`T2 = T1 × (D2/D1)^1.06`).
 - Maximum distance ratio: **4**
-- Permitted PB distances: 400m, 600m, 800m, 1000m, 1500m, 1 Mile, 2000m, 3000m, 5000m, 10K
-- Permitted targets: 400m, 600m, 800m, 1000m, 1500m, 1 Mile, 2000m, 3000m, 5000m, 10K
+- Permitted PB distances: 100m, 200m, 400m, 600m, 800m, 1000m, 1500m, 1 Mile, 2000m, 3000m, 5000m, 10K
+- Permitted targets: 100m, 200m, 400m, 600m, 800m, 1000m, 1500m, 1 Mile, 2000m, 3000m, 5000m, 10K
 - Formula: \(T_2 = T_1 \times (D_2/D_1)^{1.06}\)
-- Single-PB caveat: "General estimate from one PB. This estimate assumes a similar level of endurance across both distances."
+- Sprint short hops (e.g. 100m → 200m, 200m → 400m) use this same indicative formula. Sprint PB → long target remains blocked.
+- Single-PB caveat: indicative estimate, not a guarantee — especially for short sprints.
 
 Tracker check: 1500m in 4:30 → 800m = \(270 \times (800/1500)^{1.06} = 138.67\) s → **2:18.7**.
 
@@ -101,7 +102,7 @@ Tracker check: 1500m in 4:30 → 800m = \(270 \times (800/1500)^{1.06} = 138.67\
 |---|---|---|
 | Two-PB anchor ratio | 4 | 200m + 800m (ratio 4) can interpolate; 200m + 1000m (ratio 5) cannot |
 | Power-law distance ratio | 4 | 1500m → 5000m (3.33) allowed; 1500m → 10K (6.67) not allowed |
-| Power-law distances | 400m through 10K | 100m and 200m never use the power law |
+| Power-law distances | 100m through 10K | Short sprint hops use the same ^1.06 formula |
 | Sprint source to long target | Always blocked | 100m, 200m or 400m to 3000m, 5000m or 10K never predicts from that PB |
 
 ## 6. Example cases
@@ -120,7 +121,7 @@ Example PBs are illustrative inputs, not athlete data. Figures are what the appr
 Notes:
 
 - **A and B** use both PBs as anchors. The explanation names both PBs.
-- **C** is outside both anchors, so the personal relationship is not extended. Neither PB has an approved single-PB route to 5000m (800→5000 exceeds ratio 4; 200m is not on the power-law list), so the result is unsupported.
+- **C** is outside both anchors, so the personal relationship is not extended. Neither PB has an approved single-PB route to 5000m (800→5000 exceeds ratio 4; 200→5000 is a sprint→long block), so the result is unsupported.
 - **F** is blocked because a sprint PB never routes to 10K.
 
 ## 7. Labels and warning copy
@@ -128,14 +129,14 @@ Notes:
 - Every successful result is labelled: **Estimated equivalent performance**
 - Interpolation explanation: "Estimated between your 200m PB of 25.0 and your 800m PB of 2:10.0. The 400m lies between those two distances."
 - Power-law explanation: "Estimated from your 1500m PB of 4:30.0, scaled to 3000m."
-- Power-law assumption: "General estimate from one PB. This estimate assumes a similar level of endurance across both distances."
+- Power-law assumption: "General estimate from one PB. This is an indicative estimate, not a guarantee — especially for short sprints."
 - Display precision: tenths for targets ≤800m (for example **2:18.7**); whole seconds from 1000m up (for example **9:23**). Full precision is kept internally.
 - Outside anchors: see the outside-anchor rule above.
 - Unsupported: "We need a more relevant PB to estimate this distance reliably. Add a second PB closer to the target distance, or choose a nearer event."
 
 ## 8. Model and version visibility
 
-Users see the friendly method label, for example "Middle and long-distance scaling". The exact method ID and version, for example `power-law` and `1.06-1.0.0`, stay internal. They are carried on every result for diagnostics and tests, but are not shown in the Tool 01 interface.
+Users see the friendly method label, for example "Distance scaling". The exact method ID and version, for example `power-law` and `1.06-1.0.0`, stay internal. They are carried on every result for diagnostics and tests, but are not shown in the Tool 01 interface.
 
 ## Candidate middle-distance event-pair models
 

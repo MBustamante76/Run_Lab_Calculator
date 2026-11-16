@@ -10,6 +10,8 @@ import { approvedOnePbRouteMatrix } from "./approvedRouteMatrix";
 type StrategyClass = "UNSUPPORTED" | "EVENT_PAIR" | "POWER_LAW" | "TWO_PB_INTERPOLATION";
 
 const powerLawLabels = [
+  "100m",
+  "200m",
   "400m",
   "600m",
   "800m",
@@ -21,7 +23,6 @@ const powerLawLabels = [
   "5000m",
   "10K",
 ] as const;
-const sprintOnlyLabels = ["100m", "200m"] as const;
 
 function idFor(label: string): string {
   const event = events.find((candidate) => candidate.label === label);
@@ -160,17 +161,11 @@ describe("power-law split", () => {
     }
   });
 
-  it("keeps pure sprint PBs outside the power-law lists", () => {
-    expect(predictionConfig.powerLaw.sourceEventIds).not.toContain("100");
-    expect(predictionConfig.powerLaw.sourceEventIds).not.toContain("200");
-    for (const source of sprintOnlyLabels) {
-      for (const target of events) {
-        if (target.label === source) {
-          continue;
-        }
-        expect(onePb(source, target.label), `${source} -> ${target.label}`).toBe("UNSUPPORTED");
-      }
-    }
+  it("allows short sprint hops and still blocks sprint-to-long", () => {
+    expect(onePb("100m", "200m")).toBe("POWER_LAW");
+    expect(onePb("200m", "400m")).toBe("POWER_LAW");
+    expect(onePb("100m", "5000m")).toBe("UNSUPPORTED");
+    expect(onePb("200m", "10K")).toBe("UNSUPPORTED");
   });
 });
 
@@ -215,7 +210,7 @@ describe("two-PB routing split", () => {
   });
 
   it.each([
-    ["200m", "800m", "100m", "UNSUPPORTED"],
+    ["200m", "800m", "100m", "POWER_LAW"],
     ["200m", "800m", "1500m", "POWER_LAW"],
     ["200m", "800m", "5000m", "UNSUPPORTED"],
     ["1500m", "5000m", "800m", "POWER_LAW"],
@@ -303,6 +298,8 @@ describe("routing thresholds come from configuration", () => {
     expect(predictionConfig.interpolation.maximumAnchorRatio).toBe(4);
     expect(predictionConfig.powerLaw.maximumDistanceRatio).toBe(4);
     expect(predictionConfig.powerLaw.sourceEventIds).toEqual([
+      "100",
+      "200",
       "400",
       "600",
       "800",
@@ -315,6 +312,8 @@ describe("routing thresholds come from configuration", () => {
       "10k",
     ]);
     expect(predictionConfig.powerLaw.targetEventIds).toEqual([
+      "100",
+      "200",
       "400",
       "600",
       "800",

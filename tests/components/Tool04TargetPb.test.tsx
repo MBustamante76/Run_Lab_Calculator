@@ -8,6 +8,14 @@ function choice(name: RegExp) {
 }
 
 describe("Tool 04 target PB", () => {
+  it("shows approved Omar purpose copy", async () => {
+    const user = userEvent.setup();
+    render(<RunLabCalculatorApp />);
+    await user.click(choice(/04\s*plan my target pb/i));
+    expect(screen.getByText(/Omar has a 1500m PB of 5:10/i)).toBeInTheDocument();
+    expect(screen.getByText(/pacing plan, not a guarantee/i)).toBeInTheDocument();
+  });
+
   it("shows required pace and even splits for a 1500 m target", async () => {
     const user = userEvent.setup();
     render(<RunLabCalculatorApp />);
@@ -23,7 +31,7 @@ describe("Tool 04 target PB", () => {
     expect(screen.getByText("Required pace per km").parentElement).toHaveTextContent("3:20");
     expect(screen.getByText("Required pace per mile").parentElement).toHaveTextContent("5:22");
     expect(screen.getByText("Even 400 m").parentElement).toHaveTextContent("1:20.0");
-    expect(screen.getByText(/Maya wants to run 1500m/i)).toBeInTheDocument();
+    expect(screen.getByText(/Omar has a 1500m PB of 5:10/i)).toBeInTheDocument();
   });
 
   it("resets back to the default 1500 m target time", async () => {

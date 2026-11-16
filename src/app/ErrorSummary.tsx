@@ -14,7 +14,7 @@ export function ErrorSummary({ errors }: ErrorSummaryProps) {
     }
     const node = alertRef.current;
     if (node && typeof node.scrollIntoView === "function") {
-      node.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      node.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [errors]);
 

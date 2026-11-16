@@ -2,9 +2,53 @@ import { expect, test } from "@playwright/test";
 import { calculate, expectMetric, fillStructuredTime, openTool } from "./helpers";
 
 test.describe("Tools 04 / 05 / 06 / 07", () => {
+  test("COPY-04–07 approved What is it for? scenarios", async ({ page }) => {
+    await openTool(page, /04\s*plan my target pb/i);
+    await expect(page.getByText(/Omar has a 1500m PB of 5:10/i)).toBeVisible();
+
+    await page.getByRole("radio", { name: /05\s*build my race splits/i }).click();
+    await expect(page.getByText(/Javier wants to run 800m in 2:20/i)).toBeVisible();
+
+    await page.getByRole("radio", { name: /06\s*discover my performance profile/i }).click();
+    await expect(page.getByText(/Layla runs 800m, 1500m and 3000m/i)).toBeVisible();
+
+    await page.getByRole("radio", { name: /07\s*age-grade my performance/i }).click();
+    await expect(page.getByText(/Pat is 45 and has just run 5K in 22 minutes/i)).toBeVisible();
+  });
+
+  test("UX-P2-02 validation errors use restrained red styling", async ({ page }) => {
+    await openTool(page, /05\s*build my race splits/i);
+    await fillStructuredTime(page, { minutes: "0", seconds: "0" }, "Goal finishing time");
+    await calculate(page);
+    const summary = page.getByRole("alert");
+    await expect(summary).toBeVisible();
+    await expect(summary).toHaveCSS("background-color", "rgb(255, 241, 240)");
+    await expect(summary).toHaveCSS("color", "rgb(180, 35, 24)");
+  });
+
+  test("Mobile UX — Calculate scrolls Tool 06 results into view", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 700 });
+    await openTool(page, /06\s*discover my performance profile/i);
+    for (let i = 0; i < 3; i += 1) {
+      await page.getByRole("button", { name: /\+ Add another performance/i }).click();
+    }
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await calculate(page);
+    const target = page.locator(".run-lab-calculator__scroll-target").first();
+    await expect(target).toBeVisible();
+    await expect
+      .poll(async () =>
+        target.evaluate((el) => {
+          const top = el.getBoundingClientRect().top;
+          return top >= 0 && top < window.innerHeight * 0.55;
+        }),
+      )
+      .toBe(true);
+  });
+
   test("Tool 04 — 1500m target 5:00 shows required pace and even 400 m", async ({ page }) => {
     await openTool(page, /04\s*plan my target pb/i);
-    await expect(page.getByText(/Maya wants to run 1500m/i)).toBeVisible();
+    await expect(page.getByText(/Omar has a 1500m PB of 5:10/i)).toBeVisible();
     await page.getByLabel("Target distance").selectOption("1500");
     await fillStructuredTime(page, { minutes: "5", seconds: "0" }, "Target PB time");
     await calculate(page);

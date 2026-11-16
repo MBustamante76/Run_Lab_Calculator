@@ -14,6 +14,9 @@
   --color-panel: #f8f8f5;
   --color-white: #ffffff;
   --color-focus: rgba(255, 180, 0, 0.35);
+  --color-error-text: #b42318;
+  --color-error-panel: #fff1f0;
+  --color-error-border: #b42318;
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --space-page: 28px;
   --radius-workspace: 26px;

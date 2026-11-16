@@ -1,6 +1,11 @@
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
+import { useAutoCalculate } from "../share/useAutoCalculate";
+import { useShareState } from "../share/shareContext";
+import { timeFieldsFromMilliseconds, type ShareState } from "../share/shareState";
 import { AgeGradeResultPanel } from "../app/AgeGradeResultPanel";
 import { ErrorSummary } from "../app/ErrorSummary";
+import { FormLead } from "../app/FormLead";
+import { useScrollIntoViewOnShow } from "../app/useScrollIntoViewOnShow";
 import {
   ageGradeDistances,
   calculateAgeGrade,
@@ -36,9 +41,25 @@ function messageFor(errors: readonly ValidationError[], fieldId: string): string
 
 export function Tool07AgeGrade() {
   const sexGroup = useId();
-  const [form, setForm] = useState<AgeGradeForm>(initialForm);
+  const incoming = useShareState();
+  const ageShare = incoming?.tool === "ageGrade" ? incoming : null;
+  const [form, setForm] = useState<AgeGradeForm>(() =>
+    ageShare
+      ? {
+          sex: ageShare.sex,
+          age: String(ageShare.age),
+          distanceId: ageShare.d,
+          ...timeFieldsFromMilliseconds(ageShare.t, true),
+        }
+      : initialForm,
+  );
   const [errors, setErrors] = useState<readonly ValidationError[]>([]);
   const [result, setResult] = useState<AgeGradeResult | null>(null);
+  const [share, setShare] = useState<ShareState | null>(null);
+  const [resultScroll, setResultScroll] = useState(0);
+  const resultRef = useRef<HTMLDivElement>(null);
+  useScrollIntoViewOnShow(resultScroll, resultRef);
+  useAutoCalculate(ageShare !== null, calculate);
 
   function calculate() {
     const parsed = parseStructuredTime({
@@ -50,6 +71,7 @@ export function Tool07AgeGrade() {
     if (!parsed.ok) {
       setErrors(parsed.errors);
       setResult(null);
+      setShare(null);
       return;
     }
 
@@ -64,17 +86,27 @@ export function Tool07AgeGrade() {
     if (!graded.ok) {
       setErrors(graded.errors);
       setResult(null);
+      setShare(null);
       return;
     }
 
     setErrors([]);
     setResult(graded.value);
+    setShare({
+      tool: "ageGrade",
+      sex: form.sex,
+      age: Number(form.age),
+      d: form.distanceId,
+      t: parsed.value.milliseconds,
+    });
+    setResultScroll((n) => n + 1);
   }
 
   function reset() {
     setForm(initialForm);
     setErrors([]);
     setResult(null);
+    setShare(null);
   }
 
   return (
@@ -86,10 +118,7 @@ export function Tool07AgeGrade() {
       }}
     >
       <ErrorSummary errors={errors} />
-      <p className="run-lab-calculator__form-lead">
-        Enter sex, age, distance and race time to see your age-grade percentage on the 2025 road
-        standards.
-      </p>
+      <FormLead toolId="ageGrade" />
       <fieldset className="run-lab-calculator__units">
         <legend>Sex</legend>
         <label className="run-lab-calculator__unit">
@@ -188,7 +217,11 @@ export function Tool07AgeGrade() {
           Reset
         </button>
       </div>
-      {result ? <AgeGradeResultPanel result={result} /> : null}
+      {result ? (
+        <div ref={resultRef} className="run-lab-calculator__scroll-target">
+          {share ? <AgeGradeResultPanel result={result} share={share} /> : null}
+        </div>
+      ) : null}
     </form>
   );
 }

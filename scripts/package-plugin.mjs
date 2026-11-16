@@ -18,6 +18,9 @@ const pluginDir = path.join(root, "wordpress", "run-lab-calculator");
 const required = [
   "run-lab-calculator.php",
   "README.txt",
+  "copy-defaults.json",
+  path.join("includes", "settings.php"),
+  path.join("includes", "share-preview.php"),
   path.join("assets", "run-lab-calculator.js"),
   path.join("assets", "run-lab-calculator.css"),
 ];

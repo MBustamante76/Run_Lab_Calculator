@@ -2,7 +2,7 @@
 /**
  * Plugin Name: RUN-LAB Performance Calculator
  * Description: Mounts the RUN-LAB performance calculator with the shortcode [run_lab_calculator].
- * Version: 0.1.5
+ * Version: 0.1.8
  * Author: RUN-LAB
  * Text Domain: run-lab-calculator
  * Requires at least: 6.0
@@ -16,6 +16,9 @@ declare(strict_types=1);
 if (! defined('ABSPATH')) {
     exit;
 }
+
+require_once __DIR__ . '/includes/settings.php';
+require_once __DIR__ . '/includes/share-preview.php';
 
 /**
  * Register the calculator shortcode.
@@ -70,6 +73,13 @@ function run_lab_calculator_enqueue_assets(): void
             run_lab_calculator_asset_version($script),
             true
         );
+
+        $overrides = get_option(RUN_LAB_CALCULATOR_COPY_OPTION, array());
+        if (! is_array($overrides)) {
+            $overrides = array();
+        }
+
+        wp_localize_script('run-lab-calculator', 'runLabCalculatorCopy', $overrides);
     }
 
     if (is_readable($style)) {
