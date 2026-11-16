@@ -230,7 +230,28 @@ export function serializeShareState(state: ShareState): string {
   return params.toString();
 }
 
-export function buildShareUrl(state: ShareState, href = window.location.href): string {
+declare global {
+  interface Window {
+    runLabCalculatorConfig?: {
+      shareBaseUrl?: unknown;
+    };
+  }
+}
+
+/** Page URL that shared links should open (WordPress page, or VITE_SHARE_BASE_URL in local Vite). */
+export function shareBaseHref(fallback = window.location.href): string {
+  const fromHost = window.runLabCalculatorConfig?.shareBaseUrl;
+  if (typeof fromHost === "string" && fromHost.trim() !== "") {
+    return fromHost.trim();
+  }
+  const fromEnv = import.meta.env.VITE_SHARE_BASE_URL;
+  if (typeof fromEnv === "string" && fromEnv.trim() !== "") {
+    return fromEnv.trim();
+  }
+  return fallback;
+}
+
+export function buildShareUrl(state: ShareState, href = shareBaseHref()): string {
   const url = new URL(href);
   url.search = serializeShareState(state);
   url.hash = "";

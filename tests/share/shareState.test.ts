@@ -4,6 +4,7 @@ import {
   buildShareUrl,
   parseShareSearch,
   serializeShareState,
+  shareBaseHref,
   timeFieldsFromMilliseconds,
   type ShareState,
 } from "../../src/share/shareState";
@@ -77,5 +78,11 @@ describe("share links", () => {
 
     expect(parseShareSearch(url.search)).toEqual(state);
     expect(url.searchParams.get("card")).toBe("Pace per km\n3:20\nbold 18.00 km/h");
+  });
+
+  it("prefers the WordPress share base URL over the current page", () => {
+    window.runLabCalculatorConfig = { shareBaseUrl: "https://running-coach.uk/calculators/" };
+    expect(shareBaseHref("http://127.0.0.1:5173/")).toBe("https://running-coach.uk/calculators/");
+    delete window.runLabCalculatorConfig;
   });
 });
